@@ -232,12 +232,17 @@
 #include <iostream>
 
 int main() {
-	TwitterClient TC("AlanVekselman", 10);
+	TwitterClient TC("DiarioOle", 5);
+
+	bool isOver;
 
 	try {
 		TC.getToken();
-		while (TC.running())
-			TC.getTweets();
+
+		isOver = TC.getTweets();
+
+		while (!isOver)
+			isOver = TC.getTweets();
 
 		TC.printTweets();
 	}

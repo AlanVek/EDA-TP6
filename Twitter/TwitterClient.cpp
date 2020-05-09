@@ -31,7 +31,6 @@ TwitterClient::TwitterClient(std::string username_, int tweetCount_) : username(
 void TwitterClient::configurateTokenClient(void) {
 	struct curl_slist* list = NULL;
 
-	curl_easy_setopt(handler, CURLOPT_VERBOSE, 1L);
 	//Sets URL to read from.
 	curl_easy_setopt(handler, CURLOPT_URL, tokenLink);
 
@@ -51,16 +50,12 @@ void TwitterClient::configurateTokenClient(void) {
 	curl_easy_setopt(handler, CURLOPT_HTTPHEADER, list);
 
 	//Sets data in header.
-	std::string grantTypeHeader = grantType;
-	curl_easy_setopt(handler, CURLOPT_POSTFIELDSIZE, grantTypeHeader.size());
-	curl_easy_setopt(handler, CURLOPT_POSTFIELDS, grantTypeHeader.c_str());
+	curl_easy_setopt(handler, CURLOPT_POSTFIELDSIZE, strlen(grantType));
+	curl_easy_setopt(handler, CURLOPT_POSTFIELDS, grantType);
 
 	//Sets callback and userData.
 	curl_easy_setopt(handler, CURLOPT_WRITEFUNCTION, &writeCallback);
 	curl_easy_setopt(handler, CURLOPT_WRITEDATA, &unparsedAnswer);
-
-	//std::string pp = "POST";
-	//curl_easy_setopt(handler, CURLOPT_CUSTOMREQUEST, pp.c_str());
 }
 
 void TwitterClient::getToken(void) {
@@ -93,9 +88,9 @@ void TwitterClient::getToken(void) {
 }
 
 void TwitterClient::configurateTweetClient(void) {
-	struct curl_slist* list = nullptr;
-
 	unparsedAnswer.clear();
+
+	struct curl_slist* list = nullptr;
 
 	curl_multi_add_handle(multiHandler, handler);
 
@@ -107,11 +102,15 @@ void TwitterClient::configurateTweetClient(void) {
 	list = curl_slist_append(list, aux.c_str());
 	curl_easy_setopt(handler, CURLOPT_HTTPHEADER, list);
 
-	curl_easy_setopt(handler, CURLOPT_WRITEFUNCTION, writeCallback);
+	curl_easy_setopt(handler, CURLOPT_WRITEFUNCTION, &writeCallback);
 	curl_easy_setopt(handler, CURLOPT_WRITEDATA, &unparsedAnswer);
 }
 
-void TwitterClient::getTweets(void) {
+bool TwitterClient::getTweets(void) {
+	bool finished = false;
+
+	static bool count = false;
+
 	handler = curl_easy_init();
 	if (!handler)
 		throw (CurlErrors("Failed to initialize easy handler.\n"));
@@ -121,38 +120,48 @@ void TwitterClient::getTweets(void) {
 	if (!multiHandler)
 		throw (CurlErrors("Failed to initialize multi handler.\n"));
 
-	configurateTweetClient();
-
-	if (stillRunning) {
+	if (!count) {
+		configurateTweetClient();
+		count = true;
+	}
+	while (stillRunning) {
 		errorMulti = curl_multi_perform(multiHandler, &stillRunning);
-
 		if (errorMulti != CURLE_OK) {
 			curl_easy_cleanup(handler);
 			curl_multi_cleanup(multiHandler);
 			throw (CurlErrors("Failed to perform cURL to get tweets.\n"));
 		}
 	}
-	else {
-		curl_easy_cleanup(handler);
-		curl_multi_cleanup(multiHandler);
+	/*else {*/
+	finished = true;
 
-		j = json::parse(unparsedAnswer);
+	j = json::parse(unparsedAnswer);
 
-		try
-		{
-			std::string content, date;
-			for (auto object : j) {
-				std::string content = j["text"];
-				std::string date = j["created_at"];
+	curl_easy_cleanup(handler);
+	curl_multi_cleanup(multiHandler);
 
-				tweetVector.emplace_back(Tweet(username, content, date));
-			}
+	if (j.find("errors") != j.end()) {
+		for (auto x : j["errors"]) {
+			if (x["code"] == 404)
+				throw (CurlErrors("Username doesn't exist or there arent's so many tweets.\n"));
 		}
-		catch (std::exception& e)
-		{
-			throw (CurlErrors("Failed to get tweets from json answer.\n"));
+		throw (CurlErrors("Unknown json error during request.\n"));
+	}
+
+	try {
+		std::string content, date;
+		for (auto object : j) {
+			std::string content = object["text"];
+			std::string date = object["created_at"];
+			tweetVector.emplace_back(Tweet(username, content, date));
 		}
 	}
+	catch (std::exception& e)
+	{
+		throw (CurlErrors("Failed to get tweets from json answer.\n"));
+	}
+
+	return finished;
 }
 
 void TwitterClient::printTweets(void) {

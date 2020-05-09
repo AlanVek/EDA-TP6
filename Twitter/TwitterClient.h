@@ -10,11 +10,9 @@ public:
 	TwitterClient(std::string username_, int tweetCount_);
 
 	void getToken(void);
-	void getTweets(void);
+	bool getTweets(void);
 
 	void printTweets(void);
-
-	bool running(void) { return stillRunning; }
 
 	~TwitterClient(void);
 

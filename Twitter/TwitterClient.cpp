@@ -1,5 +1,5 @@
 #include "TwitterClient.h"
-#include "CurlErrors.h"
+#include "API_request_error.h"
 #include <iostream>
 
 using json = nlohmann::json;
@@ -65,13 +65,11 @@ void TwitterClient::configurateTokenClient(void) {
 
 //Gets Token.
 void TwitterClient::getToken(void) {
-	json j;
-
 	//Creates and verifies handler.
 	handler = curl_easy_init();
 
 	if (!handler)
-		throw CurlErrors("Failed to initialize easy handler.");
+		throw API_request_error("Failed to initialize easy handler.");
 
 	//Configurates request parameters.
 	configurateTokenClient();
@@ -82,11 +80,11 @@ void TwitterClient::getToken(void) {
 	//Throws exception if error occurred.
 	if (errorEasy != CURLE_OK) {
 		curl_easy_cleanup(handler);
-		throw CurlErrors("Failed to perform cURL easy mode.");
+		throw API_request_error("Failed to perform cURL easy mode.");
 	}
 	curl_easy_cleanup(handler);
 
-	j = json::parse(unparsedAnswer);
+	json j = json::parse(unparsedAnswer);
 
 	//Attempts to get access token or throws error if there's been one.
 	if (j.find("access_token") != j.end()) {
@@ -94,7 +92,7 @@ void TwitterClient::getToken(void) {
 		token = aux;
 	}
 	else
-		throw CurlErrors("Failed to get token from json answer.");
+		throw API_request_error("Failed to get token from json answer.");
 }
 
 //Configurates client for tweet request.
@@ -116,8 +114,8 @@ void TwitterClient::configurateTweetClient(void) {
 	curl_easy_setopt(handler, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
 
 	//Sets header with token.
-	std::string aux = constants::auxBearerStr + token;
-	list = curl_slist_append(list, aux.c_str());
+	std::string tempTokenHeader = constants::auxBearerStr + token;
+	list = curl_slist_append(list, tempTokenHeader.c_str());
 	curl_easy_setopt(handler, CURLOPT_HTTPHEADER, list);
 
 	//Sets callback and userData.
@@ -135,12 +133,12 @@ bool TwitterClient::getTweets(void) {
 		//Sets easy and multi modes with error checker.
 		handler = curl_easy_init();
 		if (!handler)
-			throw CurlErrors("Failed to initialize easy handler.");
+			throw API_request_error("Failed to initialize easy handler.");
 
 		multiHandler = curl_multi_init();
 
 		if (!multiHandler)
-			throw CurlErrors("Failed to initialize multi handler.");
+			throw API_request_error("Failed to initialize multi handler.");
 
 		//If it's the first time in this run, it sets the request parameters.
 		configurateTweetClient();
@@ -153,12 +151,10 @@ bool TwitterClient::getTweets(void) {
 		if (errorMulti != CURLE_OK) {
 			curl_easy_cleanup(handler);
 			curl_multi_cleanup(multiHandler);
-			throw CurlErrors("Failed to perform cURL to get tweets.");
+			throw API_request_error("Failed to perform cURL to get tweets.");
 		}
 	}
 	else {
-		json j;
-
 		//Cleans used variables.
 		curl_easy_cleanup(handler);
 		curl_multi_cleanup(multiHandler);
@@ -167,7 +163,7 @@ bool TwitterClient::getTweets(void) {
 		step = false;
 
 		//Parses answer.
-		j = json::parse(unparsedAnswer);
+		json j = json::parse(unparsedAnswer);
 
 		//Loads tweets.
 		loadTweetVector(j);
@@ -185,11 +181,11 @@ void TwitterClient::loadTweetVector(const json& j) {
 		//If any of them has the code invalidUsername, it throws that error.
 		for (auto x : j["errors"]) {
 			if (x["code"] == constants::invalidUsername)
-				throw CurlErrors("Username doesn't exist.");
+				throw API_request_error("Username doesn't exist.");
 		}
 
 		//Otherwise, it throws a generic error.
-		throw CurlErrors("Unknown json error during request.");
+		throw API_request_error("Unknown json error during request.");
 	}
 
 	//Attempts to load tweet vector or throws error if it wasn't possible.
@@ -202,7 +198,7 @@ void TwitterClient::loadTweetVector(const json& j) {
 		}
 	}
 	catch (std::exception& e) {
-		throw CurlErrors("Failed to get tweets from json answer.");
+		throw API_request_error("Failed to get tweets from json answer.");
 	}
 }
 

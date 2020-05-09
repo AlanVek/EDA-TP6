@@ -1,5 +1,5 @@
 #include "TwitterClient.h"
-#include "CurlErrors.h"
+#include "API_request_error.h"
 #include <iostream>
 
 int main() {

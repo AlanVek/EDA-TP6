@@ -1,11 +1,11 @@
 #pragma once
 #include <exception>
-class CurlErrors : public std::exception
+class API_request_error : public std::exception
 {
 public:
-	CurlErrors(const char* errorCode_);
+	API_request_error(const char* errorCode_);
 	virtual const char* what(void) const;
-	~CurlErrors();
+	~API_request_error();
 protected:
 	const char* errorCode;
 };

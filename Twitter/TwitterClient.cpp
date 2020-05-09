@@ -71,7 +71,7 @@ void TwitterClient::getToken(void) {
 	handler = curl_easy_init();
 
 	if (!handler)
-		throw(CurlErrors("Failed to initialize Curl."));
+		throw CurlErrors("Failed to initialize easy handler.");
 
 	//Configurates request parameters.
 	configurateTokenClient();
@@ -82,7 +82,7 @@ void TwitterClient::getToken(void) {
 	//Throws exception if error occurred.
 	if (errorEasy != CURLE_OK) {
 		curl_easy_cleanup(handler);
-		throw (CurlErrors("Failed to perform cURL easy mode."));
+		throw CurlErrors("Failed to perform cURL easy mode.");
 	}
 	curl_easy_cleanup(handler);
 
@@ -94,7 +94,7 @@ void TwitterClient::getToken(void) {
 		token = aux;
 	}
 	else
-		throw (CurlErrors("Failed to get token from json answer."));
+		throw CurlErrors("Failed to get token from json answer.");
 }
 
 //Configurates client for tweet request.
@@ -135,12 +135,12 @@ bool TwitterClient::getTweets(void) {
 		//Sets easy and multi modes with error checker.
 		handler = curl_easy_init();
 		if (!handler)
-			throw (CurlErrors("Failed to initialize easy handler."));
+			throw CurlErrors("Failed to initialize easy handler.");
 
 		multiHandler = curl_multi_init();
 
 		if (!multiHandler)
-			throw (CurlErrors("Failed to initialize multi handler."));
+			throw CurlErrors("Failed to initialize multi handler.");
 
 		//If it's the first time in this run, it sets the request parameters.
 		configurateTweetClient();
@@ -153,7 +153,7 @@ bool TwitterClient::getTweets(void) {
 		if (errorMulti != CURLE_OK) {
 			curl_easy_cleanup(handler);
 			curl_multi_cleanup(multiHandler);
-			throw (CurlErrors("Failed to perform cURL to get tweets."));
+			throw CurlErrors("Failed to perform cURL to get tweets.");
 		}
 	}
 	else {
@@ -185,11 +185,11 @@ void TwitterClient::loadTweetVector(const json& j) {
 		//If any of them has the code invalidUsername, it throws that error.
 		for (auto x : j["errors"]) {
 			if (x["code"] == constants::invalidUsername)
-				throw (CurlErrors("Username doesn't exist."));
+				throw CurlErrors("Username doesn't exist.");
 		}
 
 		//Otherwise, it throws a generic error.
-		throw (CurlErrors("Unknown json error during request."));
+		throw CurlErrors("Unknown json error during request.");
 	}
 
 	//Attempts to load tweet vector or throws error if it wasn't possible.
@@ -202,7 +202,7 @@ void TwitterClient::loadTweetVector(const json& j) {
 		}
 	}
 	catch (std::exception& e) {
-		throw (CurlErrors("Failed to get tweets from json answer."));
+		throw CurlErrors("Failed to get tweets from json answer.");
 	}
 }
 

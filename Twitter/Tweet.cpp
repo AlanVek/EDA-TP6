@@ -20,7 +20,13 @@ Tweet::~Tweet() {};
 
 std::ostream& operator << (std::ostream& o, const Tweet& tw) {
 	o << tw.username << std::endl;
-	o << tw.content.substr(0, tw.content.find("https")) << std::endl;
+
+	int pos = tw.content.find("https");
+	if (pos != std::string::npos)
+		o << tw.content.substr(0, pos) << std::endl;
+	else
+		o << tw.content << std::endl;
+
 	o << tw.date << std::endl;
 	return o;
 }

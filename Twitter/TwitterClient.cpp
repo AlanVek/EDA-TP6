@@ -1,30 +1,28 @@
 #include "TwitterClient.h"
-#include "json.hpp"
 #include "CurlErrors.h"
 #include <iostream>
 
 using json = nlohmann::json;
 
-json j;
-
-//Sets text constants to use during API request.
-const char* userLink = "https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=";
-const char* tokenLink = "https://api.twitter.com/oauth2/token";
-const char* auxBearerStr = "Authorization: Bearer ";
-const char* countCode = "&count=";
-const char* API_key = "HCB39Q15wIoH61KIkY5faRDf6";
-const char* API_SecretKey = "7s8uvgQnJqjJDqA6JsLIFp90FcOaoR5Ic41LWyHOic0Ht3SRJ6";
-const char* contentType = "Content-Type: application/x-www-form-urlencoded;charset=UTF-8";
-const char* grantType = "grant_type=client_credentials";
-
-const int invalidUsername = 34;
+// Namespace with constants to use during API request.
+namespace constants {
+	const char* userLink = "https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=";
+	const char* tokenLink = "https://api.twitter.com/oauth2/token";
+	const char* auxBearerStr = "Authorization: Bearer ";
+	const char* countCode = "&count=";
+	const char* API_key = "HCB39Q15wIoH61KIkY5faRDf6";
+	const char* API_SecretKey = "7s8uvgQnJqjJDqA6JsLIFp90FcOaoR5Ic41LWyHOic0Ht3SRJ6";
+	const char* contentType = "Content-Type: application/x-www-form-urlencoded;charset=UTF-8";
+	const char* grantType = "grant_type=client_credentials";
+	const int invalidUsername = 34;
+}
 
 size_t writeCallback(char*, size_t, size_t, void*);
 
 //TwitterClient constructor.
-TwitterClient::TwitterClient(std::string username_, int tweetCount_) : username(username_), tweetCount(tweetCount_)
+TwitterClient::TwitterClient(const std::string& username_, const int& tweetCount_) : username(username_), tweetCount(tweetCount_)
 {
-	query = userLink + username + countCode + std::to_string(tweetCount);
+	query = constants::userLink + username + constants::countCode + std::to_string(tweetCount);
 	multiHandler = nullptr;
 
 	handler = nullptr;
@@ -37,7 +35,7 @@ void TwitterClient::configurateTokenClient(void) {
 	struct curl_slist* list = NULL;
 
 	//Sets URL to read from.
-	curl_easy_setopt(handler, CURLOPT_URL, tokenLink);
+	curl_easy_setopt(handler, CURLOPT_URL, constants::tokenLink);
 
 	//Tells cURL to redirect if requested.
 	curl_easy_setopt(handler, CURLOPT_FOLLOWLOCATION, 1L);
@@ -49,16 +47,16 @@ void TwitterClient::configurateTokenClient(void) {
 	curl_easy_setopt(handler, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 
 	//Sets cURL to have API key and secret key.
-	std::string password = API_key + (std::string)":" + API_SecretKey;
+	std::string password = constants::API_key + (std::string)":" + constants::API_SecretKey;
 	curl_easy_setopt(handler, CURLOPT_USERPWD, password.c_str());
 
 	//Sets header to be of contentType.
-	list = curl_slist_append(list, contentType);
+	list = curl_slist_append(list, constants::contentType);
 	curl_easy_setopt(handler, CURLOPT_HTTPHEADER, list);
 
 	//Sets data in header.
-	curl_easy_setopt(handler, CURLOPT_POSTFIELDSIZE, strlen(grantType));
-	curl_easy_setopt(handler, CURLOPT_POSTFIELDS, grantType);
+	curl_easy_setopt(handler, CURLOPT_POSTFIELDSIZE, strlen(constants::grantType));
+	curl_easy_setopt(handler, CURLOPT_POSTFIELDS, constants::grantType);
 
 	//Sets callback and userData.
 	curl_easy_setopt(handler, CURLOPT_WRITEFUNCTION, &writeCallback);
@@ -67,6 +65,8 @@ void TwitterClient::configurateTokenClient(void) {
 
 //Gets Token.
 void TwitterClient::getToken(void) {
+	json j;
+
 	//Creates and verifies handler.
 	handler = curl_easy_init();
 
@@ -116,7 +116,7 @@ void TwitterClient::configurateTweetClient(void) {
 	curl_easy_setopt(handler, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
 
 	//Sets header with token.
-	std::string aux = auxBearerStr + token;
+	std::string aux = constants::auxBearerStr + token;
 	list = curl_slist_append(list, aux.c_str());
 	curl_easy_setopt(handler, CURLOPT_HTTPHEADER, list);
 
@@ -129,7 +129,7 @@ void TwitterClient::configurateTweetClient(void) {
 bool TwitterClient::getTweets(void) {
 	static bool step = false;
 
-	bool finished = true;
+	bool stillOn = true;
 
 	if (!step) {
 		//Sets easy and multi modes with error checker.
@@ -157,6 +157,8 @@ bool TwitterClient::getTweets(void) {
 		}
 	}
 	else {
+		json j;
+
 		//Cleans used variables.
 		curl_easy_cleanup(handler);
 		curl_multi_cleanup(multiHandler);
@@ -167,42 +169,50 @@ bool TwitterClient::getTweets(void) {
 		//Parses answer.
 		j = json::parse(unparsedAnswer);
 
-		//If there's been an error in the request...
-		if (j.find("errors") != j.end()) {
-			//If any of them has the code invalidUsername, it throws that error.
-			for (auto x : j["errors"]) {
-				if (x["code"] == invalidUsername)
-					throw (CurlErrors("Username doesn't exist."));
-			}
-
-			//Otherwise, it throws a generic error.
-			throw (CurlErrors("Unknown json error during request."));
-		}
-
-		//Attempts to load tweet vector or throws error if it wasn't possible.
-		try {
-			std::string content, date;
-			for (auto object : j) {
-				std::string content = object["text"];
-				std::string date = object["created_at"];
-				tweetVector.emplace_back(Tweet(username, content, date));
-			}
-		}
-		catch (std::exception& e) {
-			throw (CurlErrors("Failed to get tweets from json answer."));
-		}
+		//Loads tweets.
+		loadTweetVector(j);
 
 		//Sets result to 'FALSE', to end loop.
-		finished = false;
+		stillOn = false;
 	}
-	return finished;
+	return stillOn;
 }
 
-void TwitterClient::printTweets(void) {
+//Loads vector with tweets and checks for errors.
+void TwitterClient::loadTweetVector(const json& j) {
+	//If there's been an error in the request...
+	if (j.find("errors") != j.end()) {
+		//If any of them has the code invalidUsername, it throws that error.
+		for (auto x : j["errors"]) {
+			if (x["code"] == constants::invalidUsername)
+				throw (CurlErrors("Username doesn't exist."));
+		}
+
+		//Otherwise, it throws a generic error.
+		throw (CurlErrors("Unknown json error during request."));
+	}
+
+	//Attempts to load tweet vector or throws error if it wasn't possible.
+	try {
+		std::string content, date;
+		for (auto object : j) {
+			std::string content = object["text"];
+			std::string date = object["created_at"];
+			tweetVector.emplace_back(Tweet(username, content, date));
+		}
+	}
+	catch (std::exception& e) {
+		throw (CurlErrors("Failed to get tweets from json answer."));
+	}
+}
+
+//Prints tweets.
+void TwitterClient::printTweets(void) const {
 	for (auto tw : tweetVector)
 		std::cout << tw << std::endl;
 }
 
+//Callback with string as userData.
 size_t writeCallback(char* ptr, size_t size, size_t nmemb, void* userData) {
 	std::string* userDataPtr = (std::string*) userData;
 

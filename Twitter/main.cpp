@@ -6,14 +6,12 @@ int main() {
 	//Creates TwitterClient with username and tweet count.
 	TwitterClient TC("__SOMEUSERNAME__", 10);
 
-	bool running;
-
 	try {
 		//Gets client token.
 		TC.getToken();
 
 		//Gets tweets.
-		running = TC.getTweets();
+		bool running = TC.getTweets();
 
 		//Loops until client gets all tweets.
 		while (running)

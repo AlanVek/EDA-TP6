@@ -3,22 +3,24 @@
 #include <string>
 #include <vector>
 #include "Tweet.h"
+#include "json.hpp"
 
 class TwitterClient
 {
 public:
-	TwitterClient(std::string username_, int tweetCount_);
+	TwitterClient(const std::string& username_, const int& tweetCount_);
 
 	void getToken(void);
 	bool getTweets(void);
 
-	void printTweets(void);
+	void printTweets(void) const;
 
 	~TwitterClient(void);
 
 private:
 	void configurateTokenClient(void);
 	void configurateTweetClient(void);
+	void loadTweetVector(const  nlohmann::json&);
 
 	CURL* handler, * multiHandler;
 	CURLcode errorEasy;

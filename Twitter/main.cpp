@@ -9,11 +9,12 @@ int main() {
 	bool running = true;
 	int result = -1;
 
+	//Attempts to retrieve tweets.
 	try {
-		//Gets client token.
+		//Attempts to get client token.
 		TC.getToken();
 
-		//Loops until client gets all tweets.
+		//Attempts to loop until client gets all tweets.
 		while (running)
 			running = TC.getTweets();
 
@@ -22,10 +23,7 @@ int main() {
 		result = 0;
 	}
 
-	//Otherwise, it shows error message.
-	catch (CurlErrors& e) {
-		std::cout << e.what() << std::endl;
-	}
+	//Otherwise, it prints error message.
 	catch (std::exception& e) {
 		std::cout << e.what() << std::endl;
 	}

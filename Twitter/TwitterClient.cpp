@@ -2,10 +2,9 @@
 #include "API_request_error.h"
 #include <iostream>
 
-using json = nlohmann::json;
-
 // Namespace with constants to use during API request.
-namespace constants {
+namespace {
+	using json = nlohmann::json;
 	const char* userLink = "https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=";
 	const char* tokenLink = "https://api.twitter.com/oauth2/token";
 	const char* auxBearerStr = "Authorization: Bearer ";
@@ -22,7 +21,7 @@ size_t writeCallback(char*, size_t, size_t, void*);
 //TwitterClient constructor.
 TwitterClient::TwitterClient(const std::string& username_, const int& tweetCount_) : username(username_), tweetCount(tweetCount_)
 {
-	query = constants::userLink + username + constants::countCode + std::to_string(tweetCount);
+	query = userLink + username + countCode + std::to_string(tweetCount);
 	multiHandler = nullptr;
 
 	handler = nullptr;
@@ -35,7 +34,7 @@ void TwitterClient::configurateTokenClient(void) {
 	struct curl_slist* list = NULL;
 
 	//Sets URL to read from.
-	curl_easy_setopt(handler, CURLOPT_URL, constants::tokenLink);
+	curl_easy_setopt(handler, CURLOPT_URL, tokenLink);
 
 	//Tells cURL to redirect if requested.
 	curl_easy_setopt(handler, CURLOPT_FOLLOWLOCATION, 1L);
@@ -47,16 +46,16 @@ void TwitterClient::configurateTokenClient(void) {
 	curl_easy_setopt(handler, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 
 	//Sets cURL to have API key and secret key.
-	std::string password = constants::API_key + (std::string)":" + constants::API_SecretKey;
+	std::string password = API_key + (std::string)":" + API_SecretKey;
 	curl_easy_setopt(handler, CURLOPT_USERPWD, password.c_str());
 
 	//Sets header to be of contentType.
-	list = curl_slist_append(list, constants::contentType);
+	list = curl_slist_append(list, contentType);
 	curl_easy_setopt(handler, CURLOPT_HTTPHEADER, list);
 
 	//Sets data in header.
-	curl_easy_setopt(handler, CURLOPT_POSTFIELDSIZE, strlen(constants::grantType));
-	curl_easy_setopt(handler, CURLOPT_POSTFIELDS, constants::grantType);
+	curl_easy_setopt(handler, CURLOPT_POSTFIELDSIZE, strlen(grantType));
+	curl_easy_setopt(handler, CURLOPT_POSTFIELDS, grantType);
 
 	//Sets callback and userData.
 	curl_easy_setopt(handler, CURLOPT_WRITEFUNCTION, &writeCallback);
@@ -114,7 +113,7 @@ void TwitterClient::configurateTweetClient(void) {
 	curl_easy_setopt(handler, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
 
 	//Sets header with token.
-	std::string tempTokenHeader = constants::auxBearerStr + token;
+	std::string tempTokenHeader = auxBearerStr + token;
 	list = curl_slist_append(list, tempTokenHeader.c_str());
 	curl_easy_setopt(handler, CURLOPT_HTTPHEADER, list);
 
@@ -180,7 +179,7 @@ void TwitterClient::loadTweetVector(const json& j) {
 	if (j.find("errors") != j.end()) {
 		//If any of them has the code invalidUsername, it throws that error.
 		for (auto x : j["errors"]) {
-			if (x["code"] == constants::invalidUsername)
+			if (x["code"] == invalidUsername)
 				throw API_request_error("Username doesn't exist.");
 		}
 

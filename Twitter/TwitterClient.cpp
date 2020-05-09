@@ -30,7 +30,6 @@ TwitterClient::TwitterClient(std::string username_, int tweetCount_) : username(
 	handler = nullptr;
 
 	stillRunning = 1;
-	step = false;
 }
 
 //Configurates client for token request.
@@ -72,7 +71,7 @@ void TwitterClient::getToken(void) {
 	handler = curl_easy_init();
 
 	if (!handler)
-		throw(CurlErrors("Failed to initialize Curl.\n"));
+		throw(CurlErrors("Failed to initialize Curl."));
 
 	//Configurates request parameters.
 	configurateTokenClient();
@@ -83,7 +82,7 @@ void TwitterClient::getToken(void) {
 	//Throws exception if error occurred.
 	if (errorEasy != CURLE_OK) {
 		curl_easy_cleanup(handler);
-		throw (CurlErrors("Failed to perform cURL easy mode.\n"));
+		throw (CurlErrors("Failed to perform cURL easy mode."));
 	}
 	curl_easy_cleanup(handler);
 
@@ -95,7 +94,7 @@ void TwitterClient::getToken(void) {
 		token = aux;
 	}
 	else
-		throw (CurlErrors("Failed to get token from json answer.\n"));
+		throw (CurlErrors("Failed to get token from json answer."));
 }
 
 //Configurates client for tweet request.
@@ -128,72 +127,75 @@ void TwitterClient::configurateTweetClient(void) {
 
 //Gets tweets.
 bool TwitterClient::getTweets(void) {
-	//Flag for the future, when we can fix loop problem.
-	//bool finished = false;
+	static bool step = false;
 
-	//Sets easy and multi modes with error checker.
-	handler = curl_easy_init();
-	if (!handler)
-		throw (CurlErrors("Failed to initialize easy handler.\n"));
+	bool finished = true;
 
-	multiHandler = curl_multi_init();
-
-	if (!multiHandler)
-		throw (CurlErrors("Failed to initialize multi handler.\n"));
-
-	//If it's the first time in this run, it sets the request parameters.
 	if (!step) {
+		//Sets easy and multi modes with error checker.
+		handler = curl_easy_init();
+		if (!handler)
+			throw (CurlErrors("Failed to initialize easy handler."));
+
+		multiHandler = curl_multi_init();
+
+		if (!multiHandler)
+			throw (CurlErrors("Failed to initialize multi handler."));
+
+		//If it's the first time in this run, it sets the request parameters.
 		configurateTweetClient();
 		step = true;
 	}
 
 	//Should be an if. Performs one request and checks for errors.
-	while (stillRunning) {
+	if (stillRunning) {
 		errorMulti = curl_multi_perform(multiHandler, &stillRunning);
 		if (errorMulti != CURLE_OK) {
 			curl_easy_cleanup(handler);
 			curl_multi_cleanup(multiHandler);
-			throw (CurlErrors("Failed to perform cURL to get tweets.\n"));
+			throw (CurlErrors("Failed to perform cURL to get tweets."));
 		}
 	}
-	/*else {*/
-	//finished = true;
+	else {
+		//Cleans used variables.
+		curl_easy_cleanup(handler);
+		curl_multi_cleanup(multiHandler);
 
-	//Cleans used variables.
-	curl_easy_cleanup(handler);
-	curl_multi_cleanup(multiHandler);
+		//Resets step to false.
+		step = false;
 
-	step = false;
-	j = json::parse(unparsedAnswer);
+		//Parses answer.
+		j = json::parse(unparsedAnswer);
 
-	//If there's been an error in the request...
-	if (j.find("errors") != j.end()) {
-		//If any of them has the code invalidUsername, it throws that error.
-		for (auto x : j["errors"]) {
-			if (x["code"] == invalidUsername)
-				throw (CurlErrors("Username doesn't exist.\n"));
+		//If there's been an error in the request...
+		if (j.find("errors") != j.end()) {
+			//If any of them has the code invalidUsername, it throws that error.
+			for (auto x : j["errors"]) {
+				if (x["code"] == invalidUsername)
+					throw (CurlErrors("Username doesn't exist."));
+			}
+
+			//Otherwise, it throws a generic error.
+			throw (CurlErrors("Unknown json error during request."));
 		}
 
-		//Otherwise, it throws a generic error.
-		throw (CurlErrors("Unknown json error during request.\n"));
-	}
-
-	//Attempts to load tweet vector or throws error if it wasn't possible.
-	try {
-		std::string content, date;
-		for (auto object : j) {
-			std::string content = object["text"];
-			std::string date = object["created_at"];
-			tweetVector.emplace_back(Tweet(username, content, date));
+		//Attempts to load tweet vector or throws error if it wasn't possible.
+		try {
+			std::string content, date;
+			for (auto object : j) {
+				std::string content = object["text"];
+				std::string date = object["created_at"];
+				tweetVector.emplace_back(Tweet(username, content, date));
+			}
 		}
-	}
-	catch (std::exception& e) {
-		throw (CurlErrors("Failed to get tweets from json answer.\n"));
-	}
+		catch (std::exception& e) {
+			throw (CurlErrors("Failed to get tweets from json answer."));
+		}
 
-	//return finished;
-
-	return true;
+		//Sets result to 'FALSE', to end loop.
+		finished = false;
+	}
+	return finished;
 }
 
 void TwitterClient::printTweets(void) {

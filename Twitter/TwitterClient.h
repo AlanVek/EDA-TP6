@@ -26,6 +26,5 @@ private:
 	std::string token, query, username, unparsedAnswer;
 	int tweetCount, stillRunning;
 
-	bool step;
 	std::vector<Tweet> tweetVector;
 };

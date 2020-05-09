@@ -4,21 +4,22 @@
 
 int main() {
 	//Creates TwitterClient with username and tweet count.
-	TwitterClient TC("sofvignolle", 10);
+	TwitterClient TC("__SOMEUSERNAME__", 10);
 
-	bool isOver;
+	bool running;
 
 	try {
 		//Gets client token.
 		TC.getToken();
 
 		//Gets tweets.
-		isOver = TC.getTweets();
+		running = TC.getTweets();
 
-		/*while (!isOver)
-			isOver = TC.getTweets();*/
+		//Loops until client gets all tweets.
+		while (running)
+			running = TC.getTweets();
 
-			//Prints tweets.
+		//Prints tweets.
 		TC.printTweets();
 	}
 

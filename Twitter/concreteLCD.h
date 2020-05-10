@@ -1,6 +1,7 @@
 #pragma once
 #include "basicLCD.h"
 #include "allegro5/allegro.h"
+#include "allegro5/allegro_ttf.h"
 #include <string>
 
 class concreteLCD : public basicLCD {
@@ -37,4 +38,6 @@ private:
 	bool initOk;
 
 	int errorCode;
+
+	ALLEGRO_FONT* font;
 };

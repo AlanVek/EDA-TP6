@@ -32,10 +32,9 @@ int main() {
 
 	//return result;
 	concreteLCD c_lcd;
-	basicLCD* lcd = &c_lcd;
+	basicLCD& lcd = c_lcd;
 
-	if (lcd->lcdInitOk())
-		*lcd << 'a';
-
-	al_rest(4);
+	if (lcd.lcdInitOk())
+		lcd << (unsigned char*)"Que embole estos casteos";
+	al_rest(5);
 }

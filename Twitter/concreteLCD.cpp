@@ -10,6 +10,8 @@ namespace {
 	const unsigned int letterHeight = height / lcdHeight;
 
 	const char* fontName = "LCD-N.ttf";
+
+	const int spaceASCII = 32;
 }
 
 namespace errors {
@@ -90,16 +92,34 @@ bool concreteLCD::lcdClearToEOL() {
 };
 
 basicLCD& concreteLCD::operator << (const unsigned char c) {
-	double posX = letterWidth * (cadd % lcdWidth);
-	double posY = letterHeight * (cadd / lcdWidth);
+	long int posX = letterWidth * ((cadd - 1) % lcdWidth);
+	long int posY = letterHeight * ((cadd - 1) / lcdWidth);
 
-	al_draw_text(font, al_map_rgb(0, 0, 0), posX, posY, 0, (char*)&c);
+	if (!posX && c == spaceASCII)
+		return *this;
+
+	char aux = tolower((char)c);
+
+	al_draw_text(font, al_map_rgb(0, 0, 0), posX, posY, 0, (char*)&aux);
 
 	al_flip_display();
 
+	cadd++;
+
 	return *this;
 }
-basicLCD& concreteLCD::operator << (const unsigned char* c) { return *this; };
+basicLCD& concreteLCD::operator << (const unsigned char* c) {
+	int pos = 0;
+	if (strlen((char*)c) > lcdWidth * lcdHeight) {
+		pos = strlen((char*)c) - lcdWidth * lcdHeight;
+	}
+
+	while (pos < strlen((char*)c) && cadd <= lcdWidth * lcdHeight) {
+		*this << c[pos];
+		pos++;
+	}
+	return *this;
+};
 
 bool concreteLCD::lcdMoveCursorUp() {
 	if (cadd > lcdWidth)
@@ -133,8 +153,8 @@ bool concreteLCD::lcdSetCursorPosition(const cursorPosition pos) {
 cursorPosition concreteLCD::lcdGetCursorPosition() {
 	cursorPosition temp;
 
-	temp.row = (cadd / lcdWidth);
-	temp.column = cadd % lcdWidth;
+	temp.row = ((cadd - 1) / lcdWidth);
+	temp.column = (cadd - 1) % lcdWidth;
 
 	return temp;
 };
@@ -188,3 +208,11 @@ concreteLCD::~concreteLCD() {
 	if (display)
 		al_destroy_display(display);
 }
+//
+//basicLCD& concreteLCD::operator << (const char c) {
+//	return (*this << (unsigned char)c);
+//}
+//basicLCD& concreteLCD::operator << (const char* c) {
+//
+//	return (*this << (unsigned char*)c);
+//};

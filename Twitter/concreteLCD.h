@@ -23,6 +23,7 @@ public:
 
 	virtual bool lcdSetCursorPosition(const cursorPosition);
 	virtual cursorPosition lcdGetCursorPosition();
+
 protected:
 	int cadd;
 	virtual void updateCursor();

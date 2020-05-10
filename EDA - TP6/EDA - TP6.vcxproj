@@ -20,8 +20,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{7CEE9ABF-A8B3-4E5F-BED9-432BBAD91FC6}</ProjectGuid>
-    <RootNamespace>Twitter</RootNamespace>
+    <ProjectGuid>{F3CDBF01-3C6E-4A32-81FD-9B59A6735D06}</ProjectGuid>
+    <RootNamespace>EDATP6</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -69,16 +69,14 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <Allegro_AddonColor>true</Allegro_AddonColor>
     <Allegro_AddonTTF>true</Allegro_AddonTTF>
     <Allegro_AddonPrimitives>true</Allegro_AddonPrimitives>
     <Allegro_AddonFont>true</Allegro_AddonFont>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <Allegro_AddonColor>true</Allegro_AddonColor>
     <Allegro_AddonTTF>true</Allegro_AddonTTF>
     <Allegro_AddonPrimitives>true</Allegro_AddonPrimitives>
     <Allegro_AddonFont>true</Allegro_AddonFont>
@@ -89,7 +87,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
@@ -101,7 +99,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
@@ -146,19 +144,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="MyErrors.cpp" />
-    <ClCompile Include="concreteLCD.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="Tweet.cpp" />
-    <ClCompile Include="TwitterClient.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="MyErrors.h" />
     <ClInclude Include="basicLCD.h" />
     <ClInclude Include="concreteLCD.h" />
-    <ClInclude Include="json.hpp" />
+    <ClInclude Include="MyErrors.h" />
     <ClInclude Include="Tweet.h" />
     <ClInclude Include="TwitterClient.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="concreteLCD.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="MyErrors.cpp" />
+    <ClCompile Include="Tweet.cpp" />
+    <ClCompile Include="TwitterClient.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

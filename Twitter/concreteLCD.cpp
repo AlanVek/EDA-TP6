@@ -48,7 +48,7 @@ namespace errors {
 	const char* clear_EOL_fail_str = "Failed while attempting to clear to EOL.";
 }
 
-concreteLCD::concreteLCD() : cadd(1), initOk(false) {
+concreteLCD::concreteLCD() : cadd(1), lastCadd(1), initOk(false) {
 	display = nullptr;
 	try {
 		setAllegro();
@@ -70,6 +70,7 @@ bool concreteLCD::lcdClear() {
 		al_flip_display();
 		result = true;
 		cadd = 1;
+		lastCadd = 1;
 	}
 	catch (std::exception& e) {
 		errorCode = errors::al_color_fail_code;
@@ -82,7 +83,7 @@ bool concreteLCD::lcdClearToEOL() {
 	bool result = false;
 	try {
 		while ((cadd - 1) % lcdWidth) {
-			erase();
+			eraseLetter();
 			cadd++;
 		}
 		cadd = aux;
@@ -107,7 +108,7 @@ basicLCD& concreteLCD::operator << (const unsigned char c) {
 
 	al_draw_text(font, al_map_rgb(0, 0, 0), posX, posY, 0, (char*)&aux);
 
-	clearCursor();
+	lastCadd = cadd;
 	cadd++;
 	updateCursor();
 	return *this;
@@ -127,7 +128,7 @@ basicLCD& concreteLCD::operator << (const unsigned char* c) {
 
 bool concreteLCD::lcdMoveCursorUp() {
 	if (cadd > lcdWidth) {
-		clearCursor();
+		lastCadd = cadd;
 		cadd -= lcdWidth;
 	}
 	bool result = false;
@@ -142,7 +143,7 @@ bool concreteLCD::lcdMoveCursorUp() {
 };
 bool concreteLCD::lcdMoveCursorDown() {
 	if (cadd <= lcdWidth) {
-		clearCursor();
+		lastCadd = cadd;
 		cadd += lcdWidth;
 	}
 
@@ -158,7 +159,7 @@ bool concreteLCD::lcdMoveCursorDown() {
 };
 bool concreteLCD::lcdMoveCursorRight() {
 	if (cadd < lcdWidth * lcdHeight) {
-		clearCursor();
+		lastCadd = cadd;
 		cadd++;
 	}
 
@@ -174,7 +175,7 @@ bool concreteLCD::lcdMoveCursorRight() {
 };
 bool concreteLCD::lcdMoveCursorLeft() {
 	if (cadd > 1) {
-		clearCursor();
+		lastCadd = cadd;
 		cadd--;
 	}
 	bool result = false;
@@ -190,7 +191,7 @@ bool concreteLCD::lcdMoveCursorLeft() {
 
 bool concreteLCD::lcdSetCursorPosition(const cursorPosition pos) {
 	if (pos.column < lcdWidth && pos.row < height) {
-		clearCursor();
+		lastCadd = cadd;
 		cadd = pos.row * lcdWidth + pos.column + 1;
 	}
 	bool result = false;
@@ -213,13 +214,31 @@ cursorPosition concreteLCD::lcdGetCursorPosition() {
 };
 
 void concreteLCD::updateCursor() {
-	long int posX_init = letterWidth * ((cadd - 1) % lcdWidth);
-	long int posY_init = letterHeight * ((cadd - 1) / lcdWidth + 1) - lineWidth;
-	long int posX_fin = posX_init + letterWidth;
+	paintCursor(true);
 
-	al_draw_line(posX_init, posY_init, posX_fin, posY_init, fontColor, lineWidth);
+	paintCursor(false);
+
 	al_flip_display();
 };
+
+void concreteLCD::paintCursor(bool show) {
+	ALLEGRO_COLOR tempColor;
+	int tempPos;
+	if (show) {
+		tempPos = cadd;
+		tempColor = fontColor;
+	}
+	else {
+		tempPos = lastCadd;
+		tempColor = background;
+	}
+
+	long int posX_init = letterWidth * ((tempPos - 1) % lcdWidth);
+	long int posY_init = letterHeight * ((tempPos - 1) / lcdWidth + 1) - lineWidth;
+	long int posX_fin = posX_init + letterWidth - lineWidth;
+
+	al_draw_line(posX_init, posY_init, posX_fin, posY_init, tempColor, lineWidth);
+}
 
 /*Attempts to initialize Allegro and its addons.*/
 void concreteLCD::setAllegro(void) {
@@ -272,7 +291,7 @@ concreteLCD::~concreteLCD() {
 //	return (*this << (unsigned char*)c);
 //};
 
-void concreteLCD::erase() {
+void concreteLCD::eraseLetter() {
 	long int posX_init = letterWidth * ((cadd - 1) % lcdWidth);
 	long int posY_init = letterHeight * ((cadd - 1) / lcdWidth);
 	long int posX_fin = posX_init + letterWidth;
@@ -281,11 +300,3 @@ void concreteLCD::erase() {
 	al_draw_filled_rectangle(posX_init, posY_init, posX_fin, posY_fin, background);
 	al_flip_display();
 }
-
-void concreteLCD::clearCursor() {
-	long int posX_init = letterWidth * ((cadd - 1) % lcdWidth);
-	long int posY_init = letterHeight * ((cadd - 1) / lcdWidth + 1) - lineWidth;
-	long int posX_fin = posX_init + letterWidth;
-
-	al_draw_line(posX_init, posY_init, posX_fin, posY_init, background, lineWidth);
-};

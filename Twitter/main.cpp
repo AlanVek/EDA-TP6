@@ -1,8 +1,6 @@
-#include "TwitterClient.h"
-#include "MyErrors.h"
+//#include "TwitterClient.h"
+//#include "MyErrors.h"
 #include "concreteLCD.h"
-#include "basicLCD.h"
-#include <iostream>
 
 int main() {
 	////Creates TwitterClient with username and tweet count.
@@ -38,21 +36,26 @@ int main() {
 		lcd << (unsigned char*)"Que embole estos casteos";
 		al_rest(5);
 
-		lcd.lcdMoveCursorLeft();
-		al_rest(2);
+		if (lcd.lcdMoveCursorLeft()) {
+			al_rest(2);
 
-		lcd.lcdMoveCursorLeft();
-		al_rest(2);
+			if (lcd.lcdMoveCursorLeft()) {
+				al_rest(2);
 
-		lcd.lcdMoveCursorLeft();
-		al_rest(2);
+				if (lcd.lcdMoveCursorLeft()) {
+					al_rest(2);
 
-		lcd.lcdMoveCursorUp();
-		al_rest(2);
-		lcd.lcdClearToEOL();
+					if (lcd.lcdMoveCursorUp()) {
+						al_rest(2);
 
-		lcd << (unsigned char*)"buenos estos";
+						if (lcd.lcdClearToEOL()) {
+							lcd << (unsigned char*)"buenos estos";
 
-		al_rest(5);
+							al_rest(5);
+						}
+					}
+				}
+			}
+		}
 	}
 }

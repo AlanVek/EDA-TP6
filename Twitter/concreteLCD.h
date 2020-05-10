@@ -29,12 +29,10 @@ protected:
 	virtual void updateCursor();
 
 private:
-
+	void paintCursor(bool);
+	int lastCadd;
 	void setAllegro(void);
-	void clearCursor();
-	void erase();
-	//bool attemptUpdate();
-	//void clearCursor();
+	void eraseLetter();
 
 	ALLEGRO_DISPLAY* display;
 	bool initOk;

@@ -27,10 +27,11 @@ protected:
 	virtual void updateCursor();
 
 private:
-	bool setDisplay();
 
 	void setAllegro(void);
 	void initializeAll(void);
+
+	bool attemptUpdate();
 
 	ALLEGRO_DISPLAY* display;
 	bool initOk;

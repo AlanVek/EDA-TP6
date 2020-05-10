@@ -2,8 +2,24 @@
 #include <exception>
 #include <string>
 
+namespace {
+	const int NOTHING = 0;
+	const int DOWN = 1;
+	const int UP = 2;
+	const int LEFT = 3;
+	const int RIGHT = 4;
+	const int REQUEST = 5;
+	const int LOAD = 6;
+	const int END = 7;
+	const int NEXT = 8;
+	const int PREVIOUS = 9;
+	const int SETCURSOR = 10;
+	const int CLEARALL = 11;
+	const int CLEAREOL = 12;
+}
+
 //Simulation constructor.
-Simulation::Simulation(void) : running(true)
+Simulation::Simulation(void) : running(true), loaded(false)
 {
 	//Attempts to create new LCD and TwitterClient.
 	lcd = new (std::nothrow) concreteLCD;
@@ -38,55 +54,60 @@ Simulation::~Simulation() {
 }
 
 //Polls GUI and dispatches according to button code.
-void Simulation::dispatch() {
-	int code = NULL;
+void Simulation::dispatch(int code) {
 	/*int code = gui->pressed();*/
 	switch (code) {
-	case 0:
+	case NOTHING:
 		/*Roll display...*/
-	case 1:
+		/*Or show next tweet...*/
+		break;
+	case DOWN:
 		if (!lcd->lcdMoveCursorDown())
 			throw std::exception("Failed to move cursor down.");
 		break;
-	case 2:
+	case UP:
 		if (!lcd->lcdMoveCursorUp())
 			throw std::exception("Failed to move cursor up.");
 		break;
-	case 3:
+	case LEFT:
 		if (!lcd->lcdMoveCursorLeft())
 			throw std::exception("Failed to move cursor left.");
 		break;
-	case 4:
+	case RIGHT:
 		if (!lcd->lcdMoveCursorRight())
 			throw std::exception("Failed to move cursor right.");
 		break;
-	case 5:
-		tweetNumber = 0;
-		performRequest();
+	case REQUEST:
+		if (loaded) {
+			tweetNumber = 0;
+			performRequest();
+		}
 		break;
-	case 6:
+	case LOAD:
 		/*loadClient(gui->getUsername(), gui->getTweetCount());*/
 		break;
-	case 7:
+	case END:
 		running = false;
 		break;
-	case 8:
-		showNextTweet();
+	case NEXT:
+		if (loaded)
+			showNextTweet();
 		break;
-	case 9:
-		showPreviousTweet();
+	case PREVIOUS:
+		if (loaded)
+			showPreviousTweet();
 		break;
-	case 10:
+	case SETCURSOR:
 		cursorPosition temp;
 		temp.column = 0; temp.row = 0;
 		/*temp.column = gui->newCursorColumn();
 		temp.row = gui->newCursorRow();*/
 		lcd->lcdSetCursorPosition(temp);
 		break;
-	case 11:
+	case CLEARALL:
 		lcd->lcdClear();
 		break;
-	case 12:
+	case CLEAREOL:
 		lcd->lcdClearToEOL();
 		break;
 	}
@@ -102,6 +123,8 @@ void Simulation::loadClient(const char* username, int tweetCount) {
 
 		//Shows username in LCD.
 		*lcd << (unsigned char*)username;
+
+		loaded = true;
 	}
 	catch (std::exception& e) {
 		lcd->lcdClear();
@@ -111,7 +134,12 @@ void Simulation::loadClient(const char* username, int tweetCount) {
 
 //Requests tweets.
 void Simulation::performRequest(void) {
-	tc->requestTweets();
+	bool going = true;
+	while (going)
+		going = tc->requestTweets();
+	lcd->lcdClear();
+	*lcd << (unsigned char*)tc->getTweets()[0].getDate().c_str();
+	*lcd << (unsigned char*)tc->getTweets()[0].getContent().c_str();
 }
 
 //Getter.
@@ -119,27 +147,38 @@ bool Simulation::isRunning(void) { return running; }
 
 //Shows next tweet or shows error message in lcd if there are no more tweets.
 void Simulation::showNextTweet() {
-	if (tweetNumber >= tc->getTweets().size() - 1) {
-		lcd->lcdClear();
-		*lcd << (unsigned char*)"No more tweets.";
+	try {
+		if (tweetNumber >= (tc->getTweets().size() - 1)) {
+			tweetNumber = tc->getTweets().size();
+			lcd->lcdClear();
+			*lcd << (unsigned char*)"No more tweets.";
+		}
+		else {
+			tweetNumber++;
+			lcd->lcdClear();
+			*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getDate().c_str();
+			*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getContent().c_str();
+		}
 	}
-	else {
-		tweetNumber++;
-		lcd->lcdClear();
-		*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getDate().c_str();
-		*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getContent().c_str();
+	catch (std::exception& e) {
+		return;
 	}
 }
 
 //Shows previous tweet (if there is one).
 void Simulation::showPreviousTweet() {
-	if (tweetNumber <= 0) {
-		return;
+	try {
+		if (tweetNumber <= 0) {
+			return;
+		}
+		else {
+			tweetNumber--;
+			lcd->lcdClear();
+			*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getDate().c_str();
+			*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getContent().c_str();
+		}
 	}
-	else {
-		tweetNumber--;
-		lcd->lcdClear();
-		*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getDate().c_str();
-		*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getContent().c_str();
+	catch (std::exception& e) {
+		return;
 	}
 }

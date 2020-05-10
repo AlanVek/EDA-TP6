@@ -6,7 +6,7 @@ public:
 	Simulation(void);
 	~Simulation(void);
 
-	void dispatch();
+	void dispatch(int);
 
 	bool isRunning(void);
 
@@ -18,6 +18,8 @@ private:
 	TwitterClient* tc;
 	/*GUI* gui;*/
 	bool running;
+
+	bool loaded;
 
 	int tweetNumber;
 

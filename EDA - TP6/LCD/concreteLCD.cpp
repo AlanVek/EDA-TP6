@@ -93,10 +93,10 @@ bool concreteLCD::lcdClear() {
 	try {
 		//Clears to background color and updates cursor.
 		al_clear_to_color(background);
-		lcdUpdateCursor();
-		result = true;
 		cadd = 1;
 		lastCadd = 1;
+		lcdUpdateCursor();
+		result = true;
 	}
 	catch (AllegroError& e) {
 		errorCode = e.code();

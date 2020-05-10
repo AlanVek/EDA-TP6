@@ -1,16 +1,19 @@
 #include <iostream>
-#include <vector>
 #include "Simulation.h"
 
 int main() {
 	int result = -1;
 
+	int cc;
 	//Attempts to create simulation and perform.
 	try {
 		Simulation sim;
 
 		while (sim.isRunning()) {
-			sim.dispatch();
+			/*Dispatch should get cc from GUI, not from console.
+			It's just to test it.*/
+			std::cin >> cc;
+			sim.dispatch(cc);
 		}
 
 		result = 0;

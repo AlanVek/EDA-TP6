@@ -35,6 +35,6 @@ private:
 
 	ALLEGRO_DISPLAY* display;
 	bool initOk;
-	std::string errorStr;
+
 	int errorCode;
 };

@@ -9,7 +9,9 @@
 *********************************************/
 int main() {
 	const std::string username = "__SOMEUSERNAME__";
-	const int tweetCount = 0;
+
+	//If tweetCount == 0 or isn't passed to constructor, the client uses Twitter's default amount.
+	const int tweetCount = 5;
 
 	//Creates TwitterClient with username and tweet count.
 	TwitterClient TC(username, tweetCount);

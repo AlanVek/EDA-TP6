@@ -1,61 +1,55 @@
-//#include "TwitterClient.h"
-//#include "MyErrors.h"
+#include "TwitterClient.h"
+#include <iostream>
 #include "concreteLCD.h"
 
 int main() {
-	////Creates TwitterClient with username and tweet count.
-	//TwitterClient TC("__SOMEUSERNAME__");
+	const std::string username = "__SOMEUSERNAME__";
+	const int tweetCount = 3;
 
-	//bool running = true;
-	//int result = -1;
+	//Creates TwitterClient with username and tweet count.
+	TwitterClient TC(username, tweetCount);
 
-	////Attempts to retrieve tweets.
-	//try {
-	//	//Attempts to get client token.
-	//	TC.getToken();
+	bool running = true;
+	int result = -1;
 
-	//	//Attempts to loop until client gets all tweets.
-	//	while (running)
-	//		running = TC.getTweets();
-
-	//	//Prints tweets.
-	//	TC.printTweets();
-	//	result = 0;
-	//}
-
-	////Otherwise, it prints error message.
-	//catch (std::exception& e) {
-	//	std::cout << e.what() << std::endl;
-	//}
-
-	//return result;
+	//Creates LCD.
 	concreteLCD c_lcd;
 	basicLCD& lcd = c_lcd;
 
 	if (lcd.lcdInitOk()) {
-		lcd << (unsigned char*)"Que embole estos casteos";
-		al_rest(5);
+		//Shows username in display.
+		lcd << (unsigned char*)username.c_str();
 
-		if (lcd.lcdMoveCursorLeft()) {
+		try {
+			//Attempts to get client token.
+			TC.requestToken();
+
+			//Attempts to loop until client gets all tweets.
+			while (running)
+				running = TC.requestTweets();
+
+			//Prints tweets.
+			//TC.printTweets();
+
+			//Prints tweet dates.
 			al_rest(2);
-
-			if (lcd.lcdMoveCursorLeft()) {
+			lcd.lcdClear();
+			for (auto tw : TC.getTweets()) {
+				lcd << (unsigned char*)tw.getDate().c_str();
 				al_rest(2);
-
-				if (lcd.lcdMoveCursorLeft()) {
-					al_rest(2);
-
-					if (lcd.lcdMoveCursorUp()) {
-						al_rest(2);
-
-						if (lcd.lcdClearToEOL()) {
-							lcd << (unsigned char*)"buenos estos";
-
-							al_rest(5);
-						}
-					}
-				}
+				lcd.lcdClear();
 			}
+
+			result = 0;
+		}
+
+		//Otherwise, it prints error message.
+		catch (std::exception& e) {
+			lcd.lcdClear();
+			lcd << (unsigned char*)e.what();
+			al_rest(3);
 		}
 	}
+	else
+		std::cout << "Failed to initialize LCD. Code: " << lcd.lcdGetError() << std::endl;
 }

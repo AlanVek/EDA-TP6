@@ -8,7 +8,7 @@ struct cursorPosition {
 class basicLCD
 {
 public:
-	basicLCD() { cadd = 1; };
+	basicLCD() { cadd = 1; }
 	~basicLCD() {};
 
 	virtual bool lcdInitOk() = 0;
@@ -29,5 +29,5 @@ public:
 
 protected:
 	int cadd;
-	virtual void updateCursor() = 0;
+	virtual void lcdUpdateCursor() = 0;
 };

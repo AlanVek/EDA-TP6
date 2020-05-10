@@ -63,7 +63,7 @@ void TwitterClient::configurateTokenClient(void) {
 }
 
 //Gets Token.
-void TwitterClient::getToken(void) {
+void TwitterClient::requestToken(void) {
 	//Creates and verifies handler.
 	handler = curl_easy_init();
 
@@ -123,7 +123,7 @@ void TwitterClient::configurateTweetClient(void) {
 }
 
 //Gets tweets.
-bool TwitterClient::getTweets(void) {
+bool TwitterClient::requestTweets(void) {
 	static bool step = false;
 
 	bool stillOn = true;
@@ -215,5 +215,7 @@ size_t writeCallback(char* ptr, size_t size, size_t nmemb, void* userData) {
 
 	return size * nmemb;
 }
+
+std::vector<Tweet>& TwitterClient::getTweets() { return tweetVector; }
 
 TwitterClient::~TwitterClient() {}

@@ -26,9 +26,10 @@ public:
 
 protected:
 	int cadd;
-	virtual void updateCursor();
+	virtual void lcdUpdateCursor();
 
 private:
+
 	void paintCursor(bool);
 	int lastCadd;
 	void setAllegro(void);

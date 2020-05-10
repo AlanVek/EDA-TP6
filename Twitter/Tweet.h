@@ -4,9 +4,13 @@
 class Tweet
 {
 public:
-	Tweet(std::string username_, std::string content_, std::string date_);
+	Tweet(const std::string& username_, const std::string& content_, const std::string& date_);
 
 	friend std::ostream& operator <<(std::ostream& o, const Tweet& tw);
+
+	const std::string& getContent() const;
+	const std::string& getDate() const;
+	const std::string& getUsername() const;
 
 	~Tweet();
 private:

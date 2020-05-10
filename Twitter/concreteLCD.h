@@ -1,5 +1,8 @@
 #pragma once
 #include "basicLCD.h"
+#include "allegro5/allegro.h"
+#include <string>
+
 class concreteLCD : public basicLCD {
 public:
 	concreteLCD();
@@ -22,4 +25,15 @@ public:
 protected:
 	int cadd;
 	virtual void updateCursor();
+
+private:
+	bool setDisplay();
+
+	void setAllegro(void);
+	void initializeAll(void);
+
+	ALLEGRO_DISPLAY* display;
+	bool initOk;
+	std::string errorStr;
+	int errorCode;
 };

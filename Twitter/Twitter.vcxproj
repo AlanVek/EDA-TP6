@@ -138,14 +138,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="API_request_error.cpp" />
+    <ClCompile Include="MyErrors.cpp" />
     <ClCompile Include="concreteLCD.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Tweet.cpp" />
     <ClCompile Include="TwitterClient.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="API_request_error.h" />
+    <ClInclude Include="MyErrors.h" />
     <ClInclude Include="basicLCD.h" />
     <ClInclude Include="concreteLCD.h" />
     <ClInclude Include="json.hpp" />

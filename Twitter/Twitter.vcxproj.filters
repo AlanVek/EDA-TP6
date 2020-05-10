@@ -27,6 +27,9 @@
     <ClCompile Include="API_request_error.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="concreteLCD.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="json.hpp">
@@ -41,5 +44,14 @@
     <ClInclude Include="API_request_error.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="basicLCD.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="concreteLCD.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

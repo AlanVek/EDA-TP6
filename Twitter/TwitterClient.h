@@ -6,7 +6,7 @@
 class TwitterClient
 {
 public:
-	TwitterClient(const std::string& username_, const int& tweetCount_);
+	TwitterClient(const std::string& username_, const int& tweetCount_ = NULL);
 
 	void getToken(void);
 	bool getTweets(void);

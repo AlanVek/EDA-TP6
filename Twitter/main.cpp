@@ -4,7 +4,7 @@
 
 int main() {
 	//Creates TwitterClient with username and tweet count.
-	TwitterClient TC("__SOMEUSERNAME__", 10);
+	TwitterClient TC("__SOMEUSERNAME__");
 
 	bool running = true;
 	int result = -1;

@@ -408,11 +408,9 @@ bool concreteLCD::isCharSupported(const char c) {
 		bool supported = false;
 
 		//Checks for character in each range.
-		for (int i = 0; i < allRanges; i++) {
-			if (c > ranges[2 * i] && c < ranges[2 * i + 1]) {
+		for (int i = 0; i < (allRanges / 2) && (supported == false); i++) {
+			if (c > ranges[2 * i] && c < ranges[2 * i + 1])
 				supported = true;
-				i = allRanges;
-			}
 		}
 
 		return supported;

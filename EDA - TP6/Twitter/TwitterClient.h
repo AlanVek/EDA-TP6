@@ -8,12 +8,17 @@ class TwitterClient
 public:
 	TwitterClient(const std::string& username_, const int& tweetCount_ = NULL);
 
+	TwitterClient(void);
+
 	void requestToken(void);
 	bool requestTweets(void);
 
 	void printTweets(void) const;
 
 	std::vector<Tweet>& getTweets();
+
+	void newUsername(const char*);
+	void newTweetCount(int);
 
 	~TwitterClient(void);
 

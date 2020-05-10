@@ -150,6 +150,7 @@
     <ClCompile Include="LCD\AllegroError.cpp" />
     <ClCompile Include="LCD\concreteLCD.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Simulation.cpp" />
     <ClCompile Include="Twitter\API_request_error.cpp" />
     <ClCompile Include="Twitter\Tweet.cpp" />
     <ClCompile Include="Twitter\TwitterClient.cpp" />
@@ -158,6 +159,7 @@
     <ClInclude Include="LCD\AllegroError.h" />
     <ClInclude Include="LCD\basicLCD.h" />
     <ClInclude Include="LCD\concreteLCD.h" />
+    <ClInclude Include="Simulation.h" />
     <ClInclude Include="Twitter\API_request_error.h" />
     <ClInclude Include="Twitter\Tweet.h" />
     <ClInclude Include="Twitter\TwitterClient.h" />

@@ -416,7 +416,6 @@ bool concreteLCD::isCharSupported(const char c) {
 		return supported;
 	}
 	catch (std::exception& e) {
-		errorCode = errors::ranges_fail_code;
-		return false;
+		throw AllegroError(errors::ranges_fail_str, errors::ranges_fail_code);
 	}
 }

@@ -18,4 +18,9 @@ private:
 	TwitterClient* tc;
 	/*GUI* gui;*/
 	bool running;
+
+	int tweetNumber;
+
+	void showNextTweet();
+	void showPreviousTweet();
 };

@@ -23,6 +23,8 @@ Simulation::Simulation(void) : running(true)
 
 	//Requests TwitterClient token.
 	tc->requestToken();
+
+	tweetNumber = 0;
 }
 
 //Simulation destructor. Deletes used resources.
@@ -42,19 +44,69 @@ void Simulation::dispatch() {
 	switch (code) {
 	case 0:
 		/*Roll display...*/
-	/*case 1: ... */
+	case 1:
+		if (!lcd->lcdMoveCursorDown())
+			throw std::exception("Failed to move cursor down.");
+		break;
+	case 2:
+		if (!lcd->lcdMoveCursorUp())
+			throw std::exception("Failed to move cursor up.");
+		break;
+	case 3:
+		if (!lcd->lcdMoveCursorLeft())
+			throw std::exception("Failed to move cursor left.");
+		break;
+	case 4:
+		if (!lcd->lcdMoveCursorRight())
+			throw std::exception("Failed to move cursor right.");
+		break;
+	case 5:
+		tweetNumber = 0;
+		performRequest();
+		break;
+	case 6:
+		/*loadClient(gui->getUsername(), gui->getTweetCount());*/
+		break;
+	case 7:
+		running = false;
+		break;
+	case 8:
+		showNextTweet();
+		break;
+	case 9:
+		showPreviousTweet();
+		break;
+	case 10:
+		cursorPosition temp;
+		temp.column = 0; temp.row = 0;
+		/*temp.column = gui->newCursorColumn();
+		temp.row = gui->newCursorRow();*/
+		lcd->lcdSetCursorPosition(temp);
+		break;
+	case 11:
+		lcd->lcdClear();
+		break;
+	case 12:
+		lcd->lcdClearToEOL();
+		break;
 	}
 }
 
 //Loads client with username and tweetCount.
 void Simulation::loadClient(const char* username, int tweetCount) {
-	tc->newUsername(username);
+	try {
+		tc->newUsername(username);
 
-	if (tweetCount)
-		tc->newTweetCount(tweetCount);
+		if (tweetCount)
+			tc->newTweetCount(tweetCount);
 
-	//Shows username in LCD.
-	*lcd << (unsigned char*)username;
+		//Shows username in LCD.
+		*lcd << (unsigned char*)username;
+	}
+	catch (std::exception& e) {
+		lcd->lcdClear();
+		*lcd << (unsigned char*)e.what();
+	}
 }
 
 //Requests tweets.
@@ -64,3 +116,30 @@ void Simulation::performRequest(void) {
 
 //Getter.
 bool Simulation::isRunning(void) { return running; }
+
+//Shows next tweet or shows error message in lcd if there are no more tweets.
+void Simulation::showNextTweet() {
+	if (tweetNumber >= tc->getTweets().size() - 1) {
+		lcd->lcdClear();
+		*lcd << (unsigned char*)"No more tweets.";
+	}
+	else {
+		tweetNumber++;
+		lcd->lcdClear();
+		*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getDate().c_str();
+		*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getContent().c_str();
+	}
+}
+
+//Shows previous tweet (if there is one).
+void Simulation::showPreviousTweet() {
+	if (tweetNumber <= 0) {
+		return;
+	}
+	else {
+		tweetNumber--;
+		lcd->lcdClear();
+		*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getDate().c_str();
+		*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getContent().c_str();
+	}
+}

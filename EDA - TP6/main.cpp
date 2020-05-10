@@ -1,13 +1,11 @@
 #include <iostream>
+#include <vector>
 #include "Simulation.h"
 
-/*********************************************
-
-	 Toy main to test TwitterClient and LCD.
-
-*********************************************/
 int main() {
 	int result = -1;
+
+	//Attempts to create simulation and perform.
 	try {
 		Simulation sim;
 
@@ -17,6 +15,8 @@ int main() {
 
 		result = 0;
 	}
+
+	//If there's and error, it shows the error's message.
 	catch (std::exception& e) {
 		std::cout << e.what() << std::endl;
 	}

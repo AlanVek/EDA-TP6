@@ -21,12 +21,19 @@ size_t writeCallback(char*, size_t, size_t, void*);
 //TwitterClient constructor.
 TwitterClient::TwitterClient(const std::string& username_, const int& tweetCount_) : username(username_), tweetCount(tweetCount_)
 {
-	query = userLink + username + countCode + std::to_string(tweetCount);
-	multiHandler = nullptr;
+	if (username_.length() > 0) {
+		if (tweetCount_ >= 0) {
+			query = userLink + username + countCode + std::to_string(tweetCount);
+			multiHandler = nullptr;
 
-	handler = nullptr;
+			handler = nullptr;
 
-	stillRunning = 1;
+			stillRunning = 1;
+		}
+		else throw API_request_error("Invalid tweet amount.");
+	}
+	else
+		throw API_request_error("Invalid username.");
 }
 
 TwitterClient::TwitterClient(void) {
@@ -132,57 +139,53 @@ void TwitterClient::configurateTweetClient(void) {
 
 //Gets tweets.
 bool TwitterClient::requestTweets(void) {
-	if (username.length() > 0) {
-		static bool step = false;
+	static bool step = false;
 
-		bool stillOn = true;
+	bool stillOn = true;
 
-		if (!step) {
-			//Sets easy and multi modes with error checker.
-			handler = curl_easy_init();
-			if (!handler)
-				throw API_request_error("Failed to initialize easy handler.");
+	if (!step) {
+		//Sets easy and multi modes with error checker.
+		handler = curl_easy_init();
+		if (!handler)
+			throw API_request_error("Failed to initialize easy handler.");
 
-			multiHandler = curl_multi_init();
+		multiHandler = curl_multi_init();
 
-			if (!multiHandler)
-				throw API_request_error("Failed to initialize multi handler.");
+		if (!multiHandler)
+			throw API_request_error("Failed to initialize multi handler.");
 
-			//If it's the first time in this run, it sets the request parameters.
-			configurateTweetClient();
-			step = true;
-		}
+		//If it's the first time in this run, it sets the request parameters.
+		configurateTweetClient();
+		step = true;
+	}
 
-		//Should be an if. Performs one request and checks for errors.
-		if (stillRunning) {
-			errorMulti = curl_multi_perform(multiHandler, &stillRunning);
-			if (errorMulti != CURLE_OK) {
-				curl_easy_cleanup(handler);
-				curl_multi_cleanup(multiHandler);
-				throw API_request_error("Failed to perform cURL to get tweets.");
-			}
-		}
-		else {
-			//Cleans used variables.
+	//Should be an if. Performs one request and checks for errors.
+	if (stillRunning) {
+		errorMulti = curl_multi_perform(multiHandler, &stillRunning);
+		if (errorMulti != CURLE_OK) {
 			curl_easy_cleanup(handler);
 			curl_multi_cleanup(multiHandler);
-
-			//Resets step to false.
-			step = false;
-
-			//Parses answer.
-			json j = json::parse(unparsedAnswer);
-
-			//Loads tweets.
-			loadTweetVector(j);
-
-			//Sets result to 'FALSE', to end loop.
-			stillOn = false;
+			throw API_request_error("Failed to perform cURL to get tweets.");
 		}
-		return stillOn;
 	}
-	else
-		throw API_request_error("Invalid username.");
+	else {
+		//Cleans used variables.
+		curl_easy_cleanup(handler);
+		curl_multi_cleanup(multiHandler);
+
+		//Resets step to false.
+		step = false;
+
+		//Parses answer.
+		json j = json::parse(unparsedAnswer);
+
+		//Loads tweets.
+		loadTweetVector(j);
+
+		//Sets result to 'FALSE', to end loop.
+		stillOn = false;
+	}
+	return stillOn;
 }
 
 //Loads vector with tweets and checks for errors.
@@ -201,6 +204,7 @@ void TwitterClient::loadTweetVector(const json& j) {
 
 	//Attempts to load tweet vector or throws error if it wasn't possible.
 	try {
+		tweetVector.clear();
 		std::string content, date;
 		for (auto object : j) {
 			std::string content = object["text"];
@@ -230,6 +234,7 @@ size_t writeCallback(char* ptr, size_t size, size_t nmemb, void* userData) {
 
 std::vector<Tweet>& TwitterClient::getTweets() { return tweetVector; }
 
+//Sets new username.
 void TwitterClient::newUsername(const char* username_) {
 	if (strlen(username_) > 0) {
 		username = username_;
@@ -240,6 +245,7 @@ void TwitterClient::newUsername(const char* username_) {
 	}
 }
 
+//Sets new tweetCount.
 void TwitterClient::newTweetCount(int tweetCount_) {
 	if (tweetCount_ >= 0) {
 		tweetCount = tweetCount_;

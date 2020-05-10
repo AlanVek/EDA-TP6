@@ -12,6 +12,11 @@ namespace {
 	const char* fontName = "LCD-N.ttf";
 
 	const int spaceASCII = 32;
+
+	const unsigned int lineWidth = width / 160;
+
+	ALLEGRO_COLOR white;
+	ALLEGRO_COLOR black;
 }
 
 namespace errors {
@@ -45,9 +50,9 @@ namespace errors {
 
 concreteLCD::concreteLCD() : cadd(1), initOk(false) {
 	display = nullptr;
-
 	try {
 		setAllegro();
+		updateCursor();
 		initOk = true;
 	}
 	catch (AllegroError& e) {
@@ -61,7 +66,7 @@ int concreteLCD::lcdGetError() { return errorCode; };
 bool concreteLCD::lcdClear() {
 	bool result = false;
 	try {
-		al_clear_to_color(al_map_rgb(255, 255, 255));
+		al_clear_to_color(background);
 		al_flip_display();
 		result = true;
 		cadd = 1;
@@ -102,10 +107,9 @@ basicLCD& concreteLCD::operator << (const unsigned char c) {
 
 	al_draw_text(font, al_map_rgb(0, 0, 0), posX, posY, 0, (char*)&aux);
 
-	al_flip_display();
-
+	clearCursor();
 	cadd++;
-
+	updateCursor();
 	return *this;
 }
 basicLCD& concreteLCD::operator << (const unsigned char* c) {
@@ -122,33 +126,82 @@ basicLCD& concreteLCD::operator << (const unsigned char* c) {
 };
 
 bool concreteLCD::lcdMoveCursorUp() {
-	if (cadd > lcdWidth)
+	if (cadd > lcdWidth) {
+		clearCursor();
 		cadd -= lcdWidth;
-
-	return attemptUpdate();
+	}
+	bool result = false;
+	try {
+		updateCursor();
+		result = true;
+	}
+	catch (AllegroError& e) {
+		errorCode = e.code();
+	}
+	return result;
 };
 bool concreteLCD::lcdMoveCursorDown() {
-	if (cadd <= lcdWidth)
+	if (cadd <= lcdWidth) {
+		clearCursor();
 		cadd += lcdWidth;
+	}
 
-	return attemptUpdate();
+	bool result = false;
+	try {
+		updateCursor();
+		result = true;
+	}
+	catch (AllegroError& e) {
+		errorCode = e.code();
+	}
+	return result;
 };
 bool concreteLCD::lcdMoveCursorRight() {
-	if (cadd < lcdWidth * lcdHeight)
+	if (cadd < lcdWidth * lcdHeight) {
+		clearCursor();
 		cadd++;
+	}
 
-	return attemptUpdate();
+	bool result = false;
+	try {
+		updateCursor();
+		result = true;
+	}
+	catch (AllegroError& e) {
+		errorCode = e.code();
+	}
+	return result;
 };
 bool concreteLCD::lcdMoveCursorLeft() {
-	if (cadd > 1)
+	if (cadd > 1) {
+		clearCursor();
 		cadd--;
-	return attemptUpdate();
+	}
+	bool result = false;
+	try {
+		updateCursor();
+		result = true;
+	}
+	catch (AllegroError& e) {
+		errorCode = e.code();
+	}
+	return result;
 };
 
 bool concreteLCD::lcdSetCursorPosition(const cursorPosition pos) {
-	if (pos.column < lcdWidth && pos.row < height)
+	if (pos.column < lcdWidth && pos.row < height) {
+		clearCursor();
 		cadd = pos.row * lcdWidth + pos.column + 1;
-	return attemptUpdate();
+	}
+	bool result = false;
+	try {
+		updateCursor();
+		result = true;
+	}
+	catch (AllegroError& e) {
+		errorCode = e.code();
+	}
+	return result;
 };
 cursorPosition concreteLCD::lcdGetCursorPosition() {
 	cursorPosition temp;
@@ -160,7 +213,12 @@ cursorPosition concreteLCD::lcdGetCursorPosition() {
 };
 
 void concreteLCD::updateCursor() {
-	int a = 1;
+	long int posX_init = letterWidth * ((cadd - 1) % lcdWidth);
+	long int posY_init = letterHeight * ((cadd - 1) / lcdWidth + 1) - lineWidth;
+	long int posX_fin = posX_init + letterWidth;
+
+	al_draw_line(posX_init, posY_init, posX_fin, posY_init, fontColor, lineWidth);
+	al_flip_display();
 };
 
 /*Attempts to initialize Allegro and its addons.*/
@@ -185,25 +243,18 @@ void concreteLCD::setAllegro(void) {
 	else if (!(display = al_create_display(width, height))) {
 		throw AllegroError(errors::al_display_fail_str, errors::al_display_fail_code);
 	}
-	else if (!(font = al_load_ttf_font("LCD-N.ttf", letterHeight, 0))) {
+	else if (!(font = al_load_ttf_font(fontName, letterHeight, 0))) {
 		throw AllegroError(errors::al_font_load_fail_str, errors::al_font_load_fail_code);
 	}
 
-	al_clear_to_color(al_map_rgb(255, 255, 255));
+	white = al_map_rgb(255, 255, 255);
+	black = al_map_rgb(0, 0, 0);
+
+	background = white;
+	fontColor = black;
+
+	al_clear_to_color(background);
 	al_flip_display();
-}
-
-bool concreteLCD::attemptUpdate() {
-	bool result = false;
-
-	try {
-		updateCursor();
-		result = true;
-	}
-	catch (AllegroError& e) {
-		errorCode = e.code();
-	}
-	return result;
 }
 
 concreteLCD::~concreteLCD() {
@@ -225,8 +276,16 @@ void concreteLCD::erase() {
 	long int posX_init = letterWidth * ((cadd - 1) % lcdWidth);
 	long int posY_init = letterHeight * ((cadd - 1) / lcdWidth);
 	long int posX_fin = posX_init + letterWidth;
-	long int posY_fin = posY_init + letterHeight;
+	long int posY_fin = posY_init + letterHeight - 2 * lineWidth;
 
-	al_draw_filled_rectangle(posX_init, posY_init, posX_fin, posY_fin, al_map_rgb(255, 255, 255));
+	al_draw_filled_rectangle(posX_init, posY_init, posX_fin, posY_fin, background);
 	al_flip_display();
 }
+
+void concreteLCD::clearCursor() {
+	long int posX_init = letterWidth * ((cadd - 1) % lcdWidth);
+	long int posY_init = letterHeight * ((cadd - 1) / lcdWidth + 1) - lineWidth;
+	long int posX_fin = posX_init + letterWidth;
+
+	al_draw_line(posX_init, posY_init, posX_fin, posY_init, background, lineWidth);
+};

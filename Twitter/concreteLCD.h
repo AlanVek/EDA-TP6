@@ -31,13 +31,17 @@ protected:
 private:
 
 	void setAllegro(void);
+	void clearCursor();
 	void erase();
-	bool attemptUpdate();
+	//bool attemptUpdate();
+	//void clearCursor();
 
 	ALLEGRO_DISPLAY* display;
 	bool initOk;
-
 	int errorCode;
 
 	ALLEGRO_FONT* font;
+
+	ALLEGRO_COLOR background;
+	ALLEGRO_COLOR fontColor;
 };

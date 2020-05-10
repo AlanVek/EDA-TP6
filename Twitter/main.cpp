@@ -38,16 +38,20 @@ int main() {
 		lcd << (unsigned char*)"Que embole estos casteos";
 		al_rest(5);
 
+		lcd.lcdMoveCursorLeft();
+		al_rest(2);
+
+		lcd.lcdMoveCursorLeft();
+		al_rest(2);
+
+		lcd.lcdMoveCursorLeft();
+		al_rest(2);
+
 		lcd.lcdMoveCursorUp();
+		al_rest(2);
 		lcd.lcdClearToEOL();
-		/*al_rest(3);
 
-		std::cout << lcd.lcdGetCursorPosition().column << std::endl;
-		std::cout << lcd.lcdGetCursorPosition().row << std::endl;
-
-		lcd.lcdClear();
-		std::cout << lcd.lcdGetCursorPosition().column << std::endl;
-		std::cout << lcd.lcdGetCursorPosition().row << std::endl;*/
+		lcd << (unsigned char*)"buenos estos";
 
 		al_rest(5);
 	}

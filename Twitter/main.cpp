@@ -2,9 +2,14 @@
 #include <iostream>
 #include "concreteLCD.h"
 
+/*********************************************
+
+	 Toy main to test TwitterClient and LCD.
+
+*********************************************/
 int main() {
 	const std::string username = "__SOMEUSERNAME__";
-	const int tweetCount = 3;
+	const int tweetCount = 0;
 
 	//Creates TwitterClient with username and tweet count.
 	TwitterClient TC(username, tweetCount);
@@ -31,12 +36,14 @@ int main() {
 			//Prints tweets.
 			//TC.printTweets();
 
-			//Prints tweet dates.
+			/*Shows tweet dates and last 16 letters of content in LCD
+			and prints tweet in console to verify.*/
 			al_rest(2);
 			lcd.lcdClear();
 			for (auto tw : TC.getTweets()) {
-				lcd << (unsigned char*)tw.getDate().c_str();
-				al_rest(2);
+				std::cout << tw.getContent() << std::endl;
+				lcd << (unsigned char*)tw.getDate().c_str() << (unsigned char*)tw.getContent().c_str();
+				al_rest(4);
 				lcd.lcdClear();
 			}
 
@@ -52,4 +59,6 @@ int main() {
 	}
 	else
 		std::cout << "Failed to initialize LCD. Code: " << lcd.lcdGetError() << std::endl;
+
+	return result;
 }

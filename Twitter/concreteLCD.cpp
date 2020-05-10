@@ -1,6 +1,8 @@
 #include "concreteLCD.h"
 #include "MyErrors.h"
 #include <allegro5/allegro_primitives.h>
+
+// Namespace with constants to use during program.
 namespace {
 	const unsigned int width = 800;
 	const unsigned int height = 192;
@@ -19,6 +21,7 @@ namespace {
 	ALLEGRO_COLOR black;
 }
 
+// Namespace with error codes and meanings.
 namespace errors {
 	const unsigned int al_fail_code = 1;
 	const char* al_fail_str = "Failed while attempting to initialize Allegro.";
@@ -60,9 +63,11 @@ namespace errors {
 	const char* unknown_fail_str = "Unknown error.";
 }
 
+//concreteLCD constructor.
 concreteLCD::concreteLCD() : cadd(1), lastCadd(1), initOk(false) {
 	display = nullptr;
 	try {
+		//Attempts to initialize Allegro.
 		setAllegro();
 		initOk = true;
 	}
@@ -74,12 +79,17 @@ concreteLCD::concreteLCD() : cadd(1), lastCadd(1), initOk(false) {
 	}
 };
 
+//Returns initOK.
 bool concreteLCD::lcdInitOk() { return initOk; }
 
+//Returns errorCode.
 int concreteLCD::lcdGetError() { return errorCode; };
+
+//Clears LCD screen.
 bool concreteLCD::lcdClear() {
 	bool result = false;
 	try {
+		//Clears to background color and updates cursor.
 		al_clear_to_color(background);
 		lcdUpdateCursor();
 		result = true;
@@ -95,11 +105,15 @@ bool concreteLCD::lcdClear() {
 
 	return result;
 };
+
+//Clears from cursor to end of line.
 bool concreteLCD::lcdClearToEOL() {
 	int aux = cadd;
 	bool result = false;
 	try {
+		//While still inside LCD range...
 		while ((cadd - 1) % lcdWidth) {
+			//Erases letter and moves cursor.
 			eraseLetter();
 			cadd++;
 		}
@@ -114,19 +128,27 @@ bool concreteLCD::lcdClearToEOL() {
 	return result;
 };
 
+//Prints a letter in LCD.
 basicLCD& concreteLCD::operator << (const unsigned char c) {
+	//Sets letter's position in X and Y.
 	long int posX = letterWidth * ((cadd - 1) % lcdWidth);
 	long int posY = letterHeight * ((cadd - 1) / lcdWidth);
 
 	try {
+		//If it's a space, it skips it.
 		if (!posX && c == spaceASCII)
 			return *this;
 
+		//Before writing, it erases the spot.
 		eraseLetter();
+
+		//Makes letter lower cap.
 		char aux = tolower((char)c);
 
+		//Draws letter.
 		al_draw_text(font, al_map_rgb(0, 0, 0), posX, posY, 0, (char*)&aux);
 
+		//Updates cursor and cursor values.
 		lastCadd = cadd;
 		cadd++;
 		lcdUpdateCursor();
@@ -139,12 +161,17 @@ basicLCD& concreteLCD::operator << (const unsigned char c) {
 	}
 	return *this;
 }
+
+//Prints array of chars in LCD.
 basicLCD& concreteLCD::operator << (const unsigned char* c) {
 	int pos = 0;
-	if (strlen((char*)c) > lcdWidth * lcdHeight) {
-		pos = strlen((char*)c) - lcdWidth * lcdHeight;
+
+	//Sets starting position according to remaining space in LCD.
+	if (strlen((char*)c) > (lcdWidth * lcdHeight - cadd + 1)) {
+		pos = strlen((char*)c) - lcdWidth * lcdHeight + cadd - 1;
 	}
 
+	//Prints each character in the given array.
 	while (pos < strlen((char*)c) && cadd <= lcdWidth * lcdHeight) {
 		*this << c[pos];
 		pos++;
@@ -152,6 +179,7 @@ basicLCD& concreteLCD::operator << (const unsigned char* c) {
 	return *this;
 };
 
+//Moves cursor up with error checking.
 bool concreteLCD::lcdMoveCursorUp() {
 	if (cadd > lcdWidth) {
 		lastCadd = cadd;
@@ -170,6 +198,8 @@ bool concreteLCD::lcdMoveCursorUp() {
 	}
 	return result;
 };
+
+//Moves cursor down with error checking.
 bool concreteLCD::lcdMoveCursorDown() {
 	if (cadd <= lcdWidth) {
 		lastCadd = cadd;
@@ -189,6 +219,8 @@ bool concreteLCD::lcdMoveCursorDown() {
 	}
 	return result;
 };
+
+//Moves cursor right with error checking.
 bool concreteLCD::lcdMoveCursorRight() {
 	if (cadd < lcdWidth * lcdHeight) {
 		lastCadd = cadd;
@@ -208,6 +240,8 @@ bool concreteLCD::lcdMoveCursorRight() {
 	}
 	return result;
 };
+
+//Moves cursor left with error checking.
 bool concreteLCD::lcdMoveCursorLeft() {
 	if (cadd > 1) {
 		lastCadd = cadd;
@@ -227,6 +261,7 @@ bool concreteLCD::lcdMoveCursorLeft() {
 	return result;
 };
 
+//Sets cursor position with error checking and draws it.
 bool concreteLCD::lcdSetCursorPosition(const cursorPosition pos) {
 	if (pos.column < lcdWidth && pos.row < height) {
 		lastCadd = cadd;
@@ -245,6 +280,8 @@ bool concreteLCD::lcdSetCursorPosition(const cursorPosition pos) {
 	}
 	return result;
 };
+
+//Returns cursor position.
 cursorPosition concreteLCD::lcdGetCursorPosition() {
 	cursorPosition temp;
 
@@ -254,6 +291,7 @@ cursorPosition concreteLCD::lcdGetCursorPosition() {
 	return temp;
 };
 
+//Erases previous cursor and draws new one.
 void concreteLCD::lcdUpdateCursor() {
 	paintCursor(false);
 
@@ -262,23 +300,31 @@ void concreteLCD::lcdUpdateCursor() {
 	al_flip_display();
 };
 
+/*According to the 'show' bool, it either draws the
+new cursor or erases the old one. */
 void concreteLCD::paintCursor(bool show) {
 	try {
 		ALLEGRO_COLOR tempColor;
 		int tempPos;
+
+		//If 'show', it sets parameter for new cursor.
 		if (show) {
 			tempPos = cadd;
 			tempColor = fontColor;
 		}
+
+		//Otherwise, it sets parameters for old cursor.
 		else {
 			tempPos = lastCadd;
 			tempColor = background;
 		}
 
+		//Sets X and Y positions for line drawing.
 		long int posX_init = letterWidth * ((tempPos - 1) % lcdWidth);
 		long int posY_init = letterHeight * ((tempPos - 1) / lcdWidth + 1) - lineWidth;
 		long int posX_fin = posX_init + letterWidth - lineWidth;
 
+		//Draws cursor.
 		al_draw_line(posX_init, posY_init, posX_fin, posY_init, tempColor, lineWidth);
 	}
 	catch (std::exception& e) {
@@ -323,6 +369,7 @@ void concreteLCD::setAllegro(void) {
 	lcdUpdateCursor();
 }
 
+//Releases used resources.
 concreteLCD::~concreteLCD() {
 	if (display)
 		al_destroy_display(display);
@@ -330,13 +377,16 @@ concreteLCD::~concreteLCD() {
 		al_destroy_font(font);
 }
 
+//Erases a letter from LCD.
 void concreteLCD::eraseLetter() {
 	try {
+		//Sets position in X and Y.
 		long int posX_init = letterWidth * ((cadd - 1) % lcdWidth);
 		long int posY_init = letterHeight * ((cadd - 1) / lcdWidth);
 		long int posX_fin = posX_init + letterWidth;
 		long int posY_fin = posY_init + letterHeight - 2 * lineWidth;
 
+		//Draws rectangle over letter.
 		al_draw_filled_rectangle(posX_init, posY_init, posX_fin, posY_fin, background);
 	}
 	catch (std::exception& e) {

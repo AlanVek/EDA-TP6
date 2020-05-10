@@ -7,6 +7,8 @@ const char* monthToNumber(const std::string& month);
 
 //Original date format:      Sun Mar 28 18:17:53 +0000 2010
 //Expected date format:      28/03/10 - 18:17
+
+//Tweet constructor. Keeps username and content, and reshapes date into expected format.
 Tweet::Tweet(const std::string& username_, const std::string& content_, const std::string& date_) : username(username_), content(content_)
 {
 	std::string month = monthToNumber(date_.substr(4, 3));
@@ -19,6 +21,7 @@ Tweet::Tweet(const std::string& username_, const std::string& content_, const st
 
 Tweet::~Tweet() {};
 
+//Tweet printing.
 std::ostream& operator << (std::ostream& o, const Tweet& tw) {
 	o << tw.username << std::endl;
 	int pos = tw.content.find("http");
@@ -30,10 +33,12 @@ std::ostream& operator << (std::ostream& o, const Tweet& tw) {
 	return o;
 }
 
+//Class getters.
 const std::string& Tweet::getContent() const { return content; }
 const std::string& Tweet::getDate() const { return date; }
 const std::string& Tweet::getUsername() const { return username; }
 
+//Gets month's abbreviation and returns number in string.
 const char* monthToNumber(const std::string& month) {
 	if (month == "Jan")
 		return "01";

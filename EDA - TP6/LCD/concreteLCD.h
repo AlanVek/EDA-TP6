@@ -35,6 +35,8 @@ private:
 	void setAllegro(void);
 	void eraseLetter();
 
+	bool isCharSupported(const char);
+
 	ALLEGRO_DISPLAY* display;
 	bool initOk;
 	int errorCode;

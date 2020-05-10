@@ -16,6 +16,8 @@ namespace {
 	const int spaceASCII = 32;
 
 	const unsigned int lineWidth = width / 160;
+
+	const unsigned int maxRanges = 50;
 }
 
 // Namespace with error codes and meanings.
@@ -58,6 +60,9 @@ namespace errors {
 
 	const unsigned int unknown_fail_code = 13;
 	const char* unknown_fail_str = "Unknown error.";
+
+	const unsigned int ranges_fail_code = 14;
+	const char* ranges_fail_str = "Failed while attempting to validate char in font.";
 }
 
 //concreteLCD constructor.
@@ -132,8 +137,14 @@ basicLCD& concreteLCD::operator << (const unsigned char c) {
 	long int posY = letterHeight * ((cadd - 1) / lcdWidth);
 
 	try {
-		//If it's a space, it skips it.
-		if (!posX && c == spaceASCII)
+		//If it's not a space...
+		if (c != spaceASCII) {
+			//If character is not supported, it skips it.
+			if (!isCharSupported(c))
+				return *this;
+		}
+		//If it's a space in first position, it skips it.
+		else if (!posX)
 			return *this;
 
 		//Before writing, it erases the spot.
@@ -385,5 +396,29 @@ void concreteLCD::eraseLetter() {
 	}
 	catch (std::exception& e) {
 		throw AllegroError(errors::erase_fail_str, errors::erase_fail_code);
+	}
+}
+//Checks if character is supported by font.
+bool concreteLCD::isCharSupported(const char c) {
+	try {
+		int ranges[maxRanges];
+
+		//Gets font's ranges.
+		int allRanges = al_get_font_ranges(font, maxRanges, ranges);
+		bool supported = false;
+
+		//Checks for character in each range.
+		for (int i = 0; i < allRanges; i++) {
+			if (c > ranges[2 * i] && c < ranges[2 * i + 1]) {
+				supported = true;
+				i = allRanges;
+			}
+		}
+
+		return supported;
+	}
+	catch (std::exception& e) {
+		errorCode = errors::ranges_fail_code;
+		return false;
 	}
 }

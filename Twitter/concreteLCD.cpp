@@ -16,9 +16,6 @@ namespace {
 	const int spaceASCII = 32;
 
 	const unsigned int lineWidth = width / 160;
-
-	ALLEGRO_COLOR white;
-	ALLEGRO_COLOR black;
 }
 
 // Namespace with error codes and meanings.
@@ -358,11 +355,8 @@ void concreteLCD::setAllegro(void) {
 		throw AllegroError(errors::al_font_load_fail_str, errors::al_font_load_fail_code);
 	}
 
-	white = al_map_rgb(255, 255, 255);
-	black = al_map_rgb(0, 0, 0);
-
-	background = white;
-	fontColor = black;
+	background = al_map_rgb(169, 169, 169);
+	fontColor = al_map_rgb(0, 0, 0);
 
 	al_clear_to_color(background);
 

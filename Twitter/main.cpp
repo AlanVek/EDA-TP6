@@ -34,7 +34,21 @@ int main() {
 	concreteLCD c_lcd;
 	basicLCD& lcd = c_lcd;
 
-	if (lcd.lcdInitOk())
+	if (lcd.lcdInitOk()) {
 		lcd << (unsigned char*)"Que embole estos casteos";
-	al_rest(5);
+		al_rest(5);
+
+		lcd.lcdMoveCursorUp();
+		lcd.lcdClearToEOL();
+		/*al_rest(3);
+
+		std::cout << lcd.lcdGetCursorPosition().column << std::endl;
+		std::cout << lcd.lcdGetCursorPosition().row << std::endl;
+
+		lcd.lcdClear();
+		std::cout << lcd.lcdGetCursorPosition().column << std::endl;
+		std::cout << lcd.lcdGetCursorPosition().row << std::endl;*/
+
+		al_rest(5);
+	}
 }

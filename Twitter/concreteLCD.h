@@ -31,8 +31,7 @@ protected:
 private:
 
 	void setAllegro(void);
-	void initializeAll(void);
-
+	void erase();
 	bool attemptUpdate();
 
 	ALLEGRO_DISPLAY* display;

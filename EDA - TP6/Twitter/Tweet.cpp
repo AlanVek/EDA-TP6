@@ -1,8 +1,5 @@
 #include "Tweet.h"
 
-const char* extraString = "+0000";
-const int extraStrSize = strlen(extraString);
-
 const char* monthToNumber(const std::string& month);
 
 //Original date format:      Sun Mar 28 18:17:53 +0000 2010

@@ -1,6 +1,6 @@
-#include "TwitterClient.h"
+#include "Twitter/TwitterClient.h"
 #include <iostream>
-#include "concreteLCD.h"
+#include "LCD/concreteLCD.h"
 
 /*********************************************
 

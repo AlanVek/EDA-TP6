@@ -15,40 +15,46 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="basicLCD.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="concreteLCD.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MyErrors.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Tweet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TwitterClient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="concreteLCD.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MyErrors.cpp">
+    <ClCompile Include="LCD\AllegroError.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Tweet.cpp">
+    <ClCompile Include="LCD\concreteLCD.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TwitterClient.cpp">
+    <ClCompile Include="Twitter\API_request_error.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Twitter\Tweet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Twitter\TwitterClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <ClInclude Include="LCD\AllegroError.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LCD\basicLCD.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LCD\concreteLCD.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Twitter\API_request_error.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Twitter\Tweet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Twitter\TwitterClient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

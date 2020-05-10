@@ -1,5 +1,5 @@
 #include "concreteLCD.h"
-#include "MyErrors.h"
+#include "AllegroError.h"
 #include <allegro5/allegro_primitives.h>
 
 // Namespace with constants to use during program.
@@ -11,7 +11,7 @@ namespace {
 	const unsigned int letterWidth = width / lcdWidth;
 	const unsigned int letterHeight = height / lcdHeight;
 
-	const char* fontName = "LCD-6.ttf";
+	const char* fontName = "Fonts/LCD-6.ttf";
 
 	const int spaceASCII = 32;
 

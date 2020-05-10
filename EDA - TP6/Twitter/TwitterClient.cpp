@@ -1,5 +1,5 @@
 #include "TwitterClient.h"
-#include "MyErrors.h"
+#include "API_request_error.h"
 #include <iostream>
 
 // Namespace with constants to use during API request.

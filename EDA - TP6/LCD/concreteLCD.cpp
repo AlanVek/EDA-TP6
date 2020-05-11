@@ -76,7 +76,7 @@ concreteLCD::concreteLCD() : cadd(1), lastCadd(1), initOk(false) {
 	catch (AllegroError& e) {
 		errorCode = e.code();
 	}
-	catch (std::exception& e) {
+	catch (std::exception&) {
 		errorCode = errors::unknown_fail_code;
 	}
 };
@@ -101,7 +101,7 @@ bool concreteLCD::lcdClear() {
 	catch (AllegroError& e) {
 		errorCode = e.code();
 	}
-	catch (std::exception& e) {
+	catch (std::exception&) {
 		errorCode = errors::al_color_fail_code;
 	}
 
@@ -126,7 +126,7 @@ bool concreteLCD::lcdClearToEOL() {
 		result = true;
 		al_flip_display();
 	}
-	catch (std::exception& e) {
+	catch (std::exception&) {
 		errorCode = errors::clear_EOL_fail_code;
 		cadd = aux;
 	}
@@ -168,14 +168,14 @@ basicLCD& concreteLCD::operator << (const unsigned char c) {
 	catch (AllegroError& e) {
 		errorCode = e.code();
 	}
-	catch (std::exception& e) {
+	catch (std::exception&) {
 		errorCode = errors::write_fail_code;
 	}
 	return *this;
 }
 //Prints array of chars in LCD.
 basicLCD& concreteLCD::operator << (const unsigned char* c) {
-	int pos = 0;
+	unsigned int pos = 0;
 
 	//Sets starting position according to remaining space in LCD.
 	if (strlen((char*)c) > (lcdWidth * lcdHeight - cadd + 1)) {
@@ -204,7 +204,7 @@ bool concreteLCD::lcdMoveCursorUp() {
 	catch (AllegroError& e) {
 		errorCode = e.code();
 	}
-	catch (std::exception& e) {
+	catch (std::exception&) {
 		errorCode = errors::unknown_fail_code;
 	}
 	return result;
@@ -225,7 +225,7 @@ bool concreteLCD::lcdMoveCursorDown() {
 	catch (AllegroError& e) {
 		errorCode = e.code();
 	}
-	catch (std::exception& e) {
+	catch (std::exception&) {
 		errorCode = errors::unknown_fail_code;
 	}
 	return result;
@@ -246,7 +246,7 @@ bool concreteLCD::lcdMoveCursorRight() {
 	catch (AllegroError& e) {
 		errorCode = e.code();
 	}
-	catch (std::exception& e) {
+	catch (std::exception&) {
 		errorCode = errors::unknown_fail_code;
 	}
 	return result;
@@ -266,7 +266,7 @@ bool concreteLCD::lcdMoveCursorLeft() {
 	catch (AllegroError& e) {
 		errorCode = e.code();
 	}
-	catch (std::exception& e) {
+	catch (std::exception&) {
 		errorCode = errors::unknown_fail_code;
 	}
 	return result;
@@ -286,7 +286,7 @@ bool concreteLCD::lcdSetCursorPosition(const cursorPosition pos) {
 	catch (AllegroError& e) {
 		errorCode = e.code();
 	}
-	catch (std::exception& e) {
+	catch (std::exception&) {
 		errorCode = errors::unknown_fail_code;
 	}
 	return result;
@@ -338,7 +338,7 @@ void concreteLCD::paintCursor(bool show) {
 		//Draws cursor.
 		al_draw_line(posX_init, posY_init, posX_fin, posY_init, tempColor, lineWidth);
 	}
-	catch (std::exception& e) {
+	catch (std::exception&) {
 		throw AllegroError(errors::paint_cursor_fail_str, errors::paint_cursor_fail_code);
 	}
 }
@@ -397,7 +397,7 @@ void concreteLCD::eraseLetter() {
 		//Draws rectangle over letter.
 		al_draw_filled_rectangle(posX_init, posY_init, posX_fin, posY_fin, background);
 	}
-	catch (std::exception& e) {
+	catch (std::exception&) {
 		throw AllegroError(errors::erase_fail_str, errors::erase_fail_code);
 	}
 }
@@ -418,11 +418,12 @@ bool concreteLCD::isCharSupported(const char c) {
 
 		return supported;
 	}
-	catch (std::exception& e) {
+	catch (std::exception&) {
 		throw AllegroError(errors::ranges_fail_str, errors::ranges_fail_code);
 	}
 }
 
+//Gets real position to start reading char array to print in LCD.
 int concreteLCD::updatedPosition(const unsigned char* c) {
 	int tot = lcdWidth * lcdHeight - cadd + 1;
 	int count = 0;

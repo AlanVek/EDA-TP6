@@ -23,6 +23,8 @@ private:
 
 	int tweetNumber;
 
+	void loadingMessage(int*);
+
 	void showNextTweet();
 	void showPreviousTweet();
 };

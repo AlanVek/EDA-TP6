@@ -1,6 +1,7 @@
 #include "Simulation.h"
 #include <exception>
 #include <string>
+#include "Twitter/API_request_error.h"
 
 namespace {
 	const int NOTHING = 0;
@@ -104,7 +105,8 @@ void Simulation::dispatch(int code) {
 		temp.column = 0; temp.row = 0;
 		/*temp.column = gui->newCursorColumn();
 		temp.row = gui->newCursorRow();*/
-		lcd->lcdSetCursorPosition(temp);
+		if (!lcd->lcdSetCursorPosition(temp))
+			throw std::exception("Failed to change cursor's position.");
 		break;
 	case CLEARALL:
 		if (!lcd->lcdClear())
@@ -138,9 +140,7 @@ void Simulation::performRequest(void) {
 
 	//Sets variables to use in function.
 	bool going = true;
-	cursorPosition temp;
-	temp.row = 1;
-	temp.column = 0;
+
 	int sign = 0;
 
 	//Attempts to set timer resources.
@@ -149,29 +149,10 @@ void Simulation::performRequest(void) {
 		queue = al_create_event_queue();
 		al_register_event_source(queue, al_get_timer_event_source(timer));
 		al_start_timer(timer);
-	}
-	catch (std::exception& e) {
-		throw std::exception("Failed to create timer resources.");
-	}
-
-	try {
 		while (going) {
 			//Checks if there's been a timer event.
 			if (al_get_next_event(queue, &ev)) {
-				//Clears second row.
-				lcd->lcdSetCursorPosition(temp);
-				lcd->lcdClearToEOL();
-
-				//Writes "Requesting" plus 1,2 or 3 dots.
-				*lcd << (unsigned char*)"Requesting";
-				for (int i = 0; i < sign; i++)
-					*lcd << (unsigned char)'.';
-
-				//Updates number of dots.
-				if (sign == 3)
-					sign = 0;
-				else
-					sign++;
+				loadingMessage(&sign);
 			}
 
 			//Performs tweet request.
@@ -187,11 +168,15 @@ void Simulation::performRequest(void) {
 		*lcd << (unsigned char*)tc->getTweets()[0].getDate().c_str();
 		*lcd << (unsigned char*)tc->getTweets()[0].getContent().c_str();
 	}
-
-	//Shows error in LCD (mainly non-existent username).
-	catch (std::exception& e) {
+	//If it's a Twitter error, it shows it on display.
+	catch (API_request_error& e) {
 		lcd->lcdClear();
 		*lcd << (unsigned char*)e.what();
+	}
+
+	//If it's another type of error, it throws it again.
+	catch (std::exception& e) {
+		throw e;
 	}
 }
 
@@ -240,4 +225,24 @@ void Simulation::showPreviousTweet() {
 	catch (std::exception& e) {
 		return;
 	}
+}
+
+void Simulation::loadingMessage(int* dots) {
+	cursorPosition temp;
+	temp.row = 1;
+	temp.column = 0;
+	//Clears second row.
+	lcd->lcdSetCursorPosition(temp);
+	lcd->lcdClearToEOL();
+
+	//Writes "Requesting" plus 1,2 or 3 dots.
+	*lcd << (unsigned char*)"Requesting";
+	for (int i = 0; i < *dots; i++)
+		*lcd << (unsigned char)'.';
+
+	//Updates number of dots.
+	if (*dots == 3)
+		*dots = -1;
+
+	(*dots)++;
 }

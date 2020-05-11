@@ -110,17 +110,21 @@ bool concreteLCD::lcdClear() {
 
 //Clears from cursor to end of line.
 bool concreteLCD::lcdClearToEOL() {
-	int aux = cadd;
 	bool result = false;
+	int aux = cadd;
+
 	try {
 		//While still inside LCD range...
-		while ((cadd - 1) % lcdWidth) {
+		int col = lcdGetCursorPosition().column;
+		while (col < lcdWidth - 1) {
 			//Erases letter and moves cursor.
 			eraseLetter();
+			col = lcdGetCursorPosition().column;
 			cadd++;
 		}
 		cadd = aux;
 		result = true;
+		al_flip_display();
 	}
 	catch (std::exception& e) {
 		errorCode = errors::clear_EOL_fail_code;
@@ -154,7 +158,7 @@ basicLCD& concreteLCD::operator << (const unsigned char c) {
 		char aux = tolower((char)c);
 
 		//Draws letter.
-		al_draw_text(font, al_map_rgb(0, 0, 0), posX, posY, 0, (char*)&aux);
+		al_draw_text(font, fontColor, posX, posY, 0, (char*)&aux);
 
 		//Updates cursor and cursor values.
 		lastCadd = cadd;

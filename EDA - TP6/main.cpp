@@ -4,7 +4,7 @@
 int main() {
 	int result = -1;
 
-	int cc;
+	int cc = 6;
 	//Attempts to create simulation and perform.
 	try {
 		Simulation sim;
@@ -12,8 +12,21 @@ int main() {
 		while (sim.isRunning()) {
 			/*Dispatch should get cc from GUI, not from console.
 			It's just to test it.*/
-			std::cin >> cc;
 			sim.dispatch(cc);
+
+			/*Toy dispatch sequence.
+			Loads username, requests tweets,
+			exits main*/
+			switch (cc) {
+			case 6:
+				al_rest(1);
+				cc = 5;
+				break;
+			case 5:
+				al_rest(1);
+				cc = 7;
+				break;
+			}
 		}
 
 		result = 0;

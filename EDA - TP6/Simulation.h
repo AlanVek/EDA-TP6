@@ -19,7 +19,7 @@ private:
 	/*GUI* gui;*/
 	bool running;
 
-	bool loaded;
+	int loaded;
 
 	int tweetNumber;
 

@@ -16,10 +16,13 @@ namespace {
 	const int SETCURSOR = 10;
 	const int CLEARALL = 11;
 	const int CLEAREOL = 12;
+
+	const int loadedTC = 1;
+	const int requestedTweets = 2;
 }
 
 //Simulation constructor.
-Simulation::Simulation(void) : running(true), loaded(false)
+Simulation::Simulation(void) : running(true), loaded(0)
 {
 	//Attempts to create new LCD and TwitterClient.
 	lcd = new (std::nothrow) concreteLCD;
@@ -39,8 +42,6 @@ Simulation::Simulation(void) : running(true), loaded(false)
 
 	//Requests TwitterClient token.
 	tc->requestToken();
-
-	tweetNumber = 0;
 }
 
 //Simulation destructor. Deletes used resources.
@@ -78,23 +79,24 @@ void Simulation::dispatch(int code) {
 			throw std::exception("Failed to move cursor right.");
 		break;
 	case REQUEST:
-		if (loaded) {
+		if (loaded == loadedTC) {
 			tweetNumber = 0;
 			performRequest();
 		}
 		break;
 	case LOAD:
+		loadClient("AlanVekselman", 35);
 		/*loadClient(gui->getUsername(), gui->getTweetCount());*/
 		break;
 	case END:
 		running = false;
 		break;
 	case NEXT:
-		if (loaded)
+		if (loaded == requestedTweets)
 			showNextTweet();
 		break;
 	case PREVIOUS:
-		if (loaded)
+		if (loaded == requestedTweets)
 			showPreviousTweet();
 		break;
 	case SETCURSOR:
@@ -105,41 +107,92 @@ void Simulation::dispatch(int code) {
 		lcd->lcdSetCursorPosition(temp);
 		break;
 	case CLEARALL:
-		lcd->lcdClear();
+		if (!lcd->lcdClear())
+			throw std::exception("Failed to clear LCD.");
 		break;
 	case CLEAREOL:
-		lcd->lcdClearToEOL();
+		if (!lcd->lcdClearToEOL())
+			throw std::exception("Failed to clear to EOL in LCD");
 		break;
 	}
 }
 
 //Loads client with username and tweetCount.
 void Simulation::loadClient(const char* username, int tweetCount) {
+	tc->newUsername(username);
+
+	if (tweetCount)
+		tc->newTweetCount(tweetCount);
+
+	//Shows username in LCD.
+	*lcd << (unsigned char*)username;
+
+	loaded = true;
+}
+//Requests tweets.
+void Simulation::performRequest(void) {
+	//Creates timer resources for dynamic loading identifier.
+	ALLEGRO_TIMER* timer;
+	ALLEGRO_EVENT_QUEUE* queue;
+	ALLEGRO_EVENT ev;
+
+	//Sets variables to use in function.
+	bool going = true;
+	cursorPosition temp;
+	temp.row = 1;
+	temp.column = 0;
+	int sign = 0;
+
+	//Attempts to set timer resources.
 	try {
-		tc->newUsername(username);
-
-		if (tweetCount)
-			tc->newTweetCount(tweetCount);
-
-		//Shows username in LCD.
-		*lcd << (unsigned char*)username;
-
-		loaded = true;
+		timer = al_create_timer(0.1);
+		queue = al_create_event_queue();
+		al_register_event_source(queue, al_get_timer_event_source(timer));
+		al_start_timer(timer);
 	}
+	catch (std::exception& e) {
+		throw std::exception("Failed to create timer resources.");
+	}
+
+	try {
+		while (going) {
+			//Checks if there's been a timer event.
+			if (al_get_next_event(queue, &ev)) {
+				//Clears second row.
+				lcd->lcdSetCursorPosition(temp);
+				lcd->lcdClearToEOL();
+
+				//Writes "Requesting" plus 1,2 or 3 dots.
+				*lcd << (unsigned char*)"Requesting";
+				for (int i = 0; i < sign; i++)
+					*lcd << (unsigned char)'.';
+
+				//Updates number of dots.
+				if (sign == 3)
+					sign = 0;
+				else
+					sign++;
+			}
+
+			//Performs tweet request.
+			going = tc->requestTweets();
+		}
+
+		//Destroys timer resources.
+		al_destroy_timer(timer);
+		al_destroy_event_queue(queue);
+
+		//Clears LCD and writes first tweet's date and content.
+		lcd->lcdClear();
+		*lcd << (unsigned char*)tc->getTweets()[0].getDate().c_str();
+		*lcd << (unsigned char*)tc->getTweets()[0].getContent().c_str();
+	}
+
+	//Shows error in LCD (mainly non-existent username).
 	catch (std::exception& e) {
 		lcd->lcdClear();
 		*lcd << (unsigned char*)e.what();
 	}
-}
-
-//Requests tweets.
-void Simulation::performRequest(void) {
-	bool going = true;
-	while (going)
-		going = tc->requestTweets();
-	lcd->lcdClear();
-	*lcd << (unsigned char*)tc->getTweets()[0].getDate().c_str();
-	*lcd << (unsigned char*)tc->getTweets()[0].getContent().c_str();
 }
 
 //Getter.
@@ -148,11 +201,14 @@ bool Simulation::isRunning(void) { return running; }
 //Shows next tweet or shows error message in lcd if there are no more tweets.
 void Simulation::showNextTweet() {
 	try {
+		//Notice of last tweet.
 		if (tweetNumber >= (tc->getTweets().size() - 1)) {
 			tweetNumber = tc->getTweets().size();
 			lcd->lcdClear();
 			*lcd << (unsigned char*)"No more tweets.";
 		}
+
+		//Shows next tweet and updates tweetNumber.
 		else {
 			tweetNumber++;
 			lcd->lcdClear();
@@ -168,9 +224,12 @@ void Simulation::showNextTweet() {
 //Shows previous tweet (if there is one).
 void Simulation::showPreviousTweet() {
 	try {
+		//Does nothing if there isn't a previous tweet.
 		if (tweetNumber <= 0) {
 			return;
 		}
+
+		//Shows previous tweet and updates tweetNumber.
 		else {
 			tweetNumber--;
 			lcd->lcdClear();

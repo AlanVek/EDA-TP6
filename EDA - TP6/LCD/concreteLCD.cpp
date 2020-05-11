@@ -144,7 +144,7 @@ basicLCD& concreteLCD::operator << (const unsigned char c) {
 		//If it's not a space...
 		if (c != spaceASCII) {
 			//If character is not supported, it skips it.
-			if (!isCharSupported(c))
+			if (supportedChars.find(c) == std::string::npos && !isCharSupported(c))
 				return *this;
 		}
 		//If it's a space in first position, it skips it.
@@ -412,8 +412,10 @@ bool concreteLCD::isCharSupported(const char c) {
 
 		//Checks for character in each range.
 		for (int i = 0; i < (allRanges / 2) && (supported == false); i++) {
-			if (c > ranges[2 * i] && c < ranges[2 * i + 1])
+			if (c > ranges[2 * i] && c < ranges[2 * i + 1]) {
 				supported = true;
+				supportedChars.append(1, c);
+			}
 		}
 
 		return supported;
@@ -428,7 +430,7 @@ int concreteLCD::updatedPosition(const unsigned char* c) {
 	int tot = lcdWidth * lcdHeight - cadd + 1;
 	int count = 0;
 	for (int i = strlen((char*)c) - 1; i > -1; i--) {
-		if (isCharSupported(c[i])) {
+		if (supportedChars.find(c[i]) != std::string::npos || isCharSupported(c[i])) {
 			count++;
 			if (count == tot)
 				return i;

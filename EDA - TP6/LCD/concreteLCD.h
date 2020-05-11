@@ -46,4 +46,6 @@ private:
 
 	ALLEGRO_COLOR background;
 	ALLEGRO_COLOR fontColor;
+
+	std::string supportedChars;
 };

@@ -18,48 +18,48 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Simulation\Simulation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Simulation\Twitter\API_request_error.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Simulation\Twitter\Tweet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Simulation\Twitter\TwitterClient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Simulation\LCD\AllegroError.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Simulation\LCD\concreteLCD.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LCD\AllegroError.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LCD\concreteLCD.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Twitter\API_request_error.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Twitter\Tweet.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Twitter\TwitterClient.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Simulation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="LCD\AllegroError.h">
+    <ClInclude Include="Simulation\Simulation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LCD\basicLCD.h">
+    <ClInclude Include="Simulation\Twitter\API_request_error.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LCD\concreteLCD.h">
+    <ClInclude Include="Simulation\Twitter\Tweet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Twitter\API_request_error.h">
+    <ClInclude Include="Simulation\Twitter\TwitterClient.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Twitter\Tweet.h">
+    <ClInclude Include="Simulation\LCD\AllegroError.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Twitter\TwitterClient.h">
+    <ClInclude Include="Simulation\LCD\basicLCD.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Simulation.h">
+    <ClInclude Include="Simulation\LCD\concreteLCD.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

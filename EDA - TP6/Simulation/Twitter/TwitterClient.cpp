@@ -221,7 +221,7 @@ void TwitterClient::loadTweetVector(const json& j) {
 			tweetVector.emplace_back(Tweet(username, content, date));
 		}
 	}
-	catch (std::exception& e) {
+	catch (std::exception&) {
 		throw API_request_error("Failed to get tweets from json answer.");
 	}
 }

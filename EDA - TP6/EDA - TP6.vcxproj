@@ -147,22 +147,22 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="LCD\AllegroError.cpp" />
-    <ClCompile Include="LCD\concreteLCD.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Simulation.cpp" />
-    <ClCompile Include="Twitter\API_request_error.cpp" />
-    <ClCompile Include="Twitter\Tweet.cpp" />
-    <ClCompile Include="Twitter\TwitterClient.cpp" />
+    <ClCompile Include="Simulation\LCD\AllegroError.cpp" />
+    <ClCompile Include="Simulation\LCD\concreteLCD.cpp" />
+    <ClCompile Include="Simulation\Simulation.cpp" />
+    <ClCompile Include="Simulation\Twitter\API_request_error.cpp" />
+    <ClCompile Include="Simulation\Twitter\Tweet.cpp" />
+    <ClCompile Include="Simulation\Twitter\TwitterClient.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="LCD\AllegroError.h" />
-    <ClInclude Include="LCD\basicLCD.h" />
-    <ClInclude Include="LCD\concreteLCD.h" />
-    <ClInclude Include="Simulation.h" />
-    <ClInclude Include="Twitter\API_request_error.h" />
-    <ClInclude Include="Twitter\Tweet.h" />
-    <ClInclude Include="Twitter\TwitterClient.h" />
+    <ClInclude Include="Simulation\LCD\AllegroError.h" />
+    <ClInclude Include="Simulation\LCD\basicLCD.h" />
+    <ClInclude Include="Simulation\LCD\concreteLCD.h" />
+    <ClInclude Include="Simulation\Simulation.h" />
+    <ClInclude Include="Simulation\Twitter\API_request_error.h" />
+    <ClInclude Include="Simulation\Twitter\Tweet.h" />
+    <ClInclude Include="Simulation\Twitter\TwitterClient.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

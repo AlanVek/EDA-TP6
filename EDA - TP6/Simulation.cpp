@@ -121,15 +121,21 @@ void Simulation::dispatch(int code) {
 
 //Loads client with username and tweetCount.
 void Simulation::loadClient(const char* username, int tweetCount) {
-	tc->newUsername(username);
+	try {
+		tc->newUsername(username);
 
-	if (tweetCount)
-		tc->newTweetCount(tweetCount);
+		if (tweetCount)
+			tc->newTweetCount(tweetCount);
 
-	//Shows username in LCD.
-	*lcd << (unsigned char*)username;
+		//Shows username in LCD.
+		*lcd << (unsigned char*)username;
 
-	loaded = true;
+		loaded = loadedTC;
+	}
+	catch (API_request_error& e) {
+		lcd->lcdClear();
+		*lcd << (unsigned char*)e.what();
+	}
 }
 //Requests tweets.
 void Simulation::performRequest(void) {
@@ -167,16 +173,13 @@ void Simulation::performRequest(void) {
 		lcd->lcdClear();
 		*lcd << (unsigned char*)tc->getTweets()[0].getDate().c_str();
 		*lcd << (unsigned char*)tc->getTweets()[0].getContent().c_str();
+
+		loaded = requestedTweets;
 	}
 	//If it's a Twitter error, it shows it on display.
 	catch (API_request_error& e) {
 		lcd->lcdClear();
 		*lcd << (unsigned char*)e.what();
-	}
-
-	//If it's another type of error, it throws it again.
-	catch (std::exception& e) {
-		throw e;
 	}
 }
 

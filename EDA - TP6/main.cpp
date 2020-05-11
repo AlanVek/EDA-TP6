@@ -4,6 +4,8 @@
 int main() {
 	int result = -1;
 
+	int step = 0;
+
 	int cc = 6;
 	//Attempts to create simulation and perform.
 	try {
@@ -24,7 +26,13 @@ int main() {
 				break;
 			case 5:
 				al_rest(1);
-				cc = 7;
+				if (step)
+					cc = 7;
+				else {
+					cc = 6;
+					step++;
+					al_rest(1);
+				}
 				break;
 			}
 		}

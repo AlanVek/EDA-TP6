@@ -128,12 +128,15 @@ void Simulation::loadClient(const char* username, int tweetCount) {
 			tc->newTweetCount(tweetCount);
 
 		//Shows username in LCD.
+		if (!lcd->lcdClear())
+			throw std::exception("Failed to clear LCD");
 		*lcd << (unsigned char*)username;
 
 		loaded = loadedTC;
 	}
 	catch (API_request_error& e) {
-		lcd->lcdClear();
+		if (!lcd->lcdClear())
+			throw std::exception("Failed to clear LCD");
 		*lcd << (unsigned char*)e.what();
 	}
 }
@@ -170,7 +173,8 @@ void Simulation::performRequest(void) {
 		al_destroy_event_queue(queue);
 
 		//Clears LCD and writes first tweet's date and content.
-		lcd->lcdClear();
+		if (!lcd->lcdClear())
+			throw std::exception("Failed to clear LCD");
 		*lcd << (unsigned char*)tc->getTweets()[0].getDate().c_str();
 		*lcd << (unsigned char*)tc->getTweets()[0].getContent().c_str();
 
@@ -178,7 +182,8 @@ void Simulation::performRequest(void) {
 	}
 	//If it's a Twitter error, it shows it on display.
 	catch (API_request_error& e) {
-		lcd->lcdClear();
+		if (!lcd->lcdClear())
+			throw std::exception("Failed to clear LCD");
 		*lcd << (unsigned char*)e.what();
 	}
 }
@@ -192,14 +197,16 @@ void Simulation::showNextTweet() {
 		//Notice of last tweet.
 		if (tweetNumber >= (tc->getTweets().size() - 1)) {
 			tweetNumber = tc->getTweets().size();
-			lcd->lcdClear();
+			if (!lcd->lcdClear())
+				throw std::exception("Failed to clear LCD");
 			*lcd << (unsigned char*)"No more tweets.";
 		}
 
 		//Shows next tweet and updates tweetNumber.
 		else {
 			tweetNumber++;
-			lcd->lcdClear();
+			if (!lcd->lcdClear())
+				throw std::exception("Failed to clear LCD");
 			*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getDate().c_str();
 			*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getContent().c_str();
 		}
@@ -220,7 +227,8 @@ void Simulation::showPreviousTweet() {
 		//Shows previous tweet and updates tweetNumber.
 		else {
 			tweetNumber--;
-			lcd->lcdClear();
+			if (!lcd->lcdClear())
+				throw std::exception("Failed to clear LCD");
 			*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getDate().c_str();
 			*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getContent().c_str();
 		}
@@ -235,8 +243,10 @@ void Simulation::loadingMessage(int* dots) {
 	temp.row = 1;
 	temp.column = 0;
 	//Clears second row.
-	lcd->lcdSetCursorPosition(temp);
-	lcd->lcdClearToEOL();
+	if (!lcd->lcdSetCursorPosition(temp))
+		throw std::exception("Failed to set cursor's position.");
+	if (!lcd->lcdClearToEOL())
+		throw std::exception("Failed to clear to EOL in LCD");
 
 	//Writes "Requesting" plus 1,2 or 3 dots.
 	*lcd << (unsigned char*)"Requesting";

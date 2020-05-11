@@ -21,7 +21,7 @@ private:
 
 	int loaded;
 
-	int tweetNumber;
+	unsigned int tweetNumber;
 
 	void loadingMessage(int*);
 

@@ -213,7 +213,7 @@ void Simulation::showNextTweet() {
 			*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getContent().c_str();
 		}
 	}
-	catch (std::exception& e) {
+	catch (std::exception&) {
 		return;
 	}
 }
@@ -235,7 +235,7 @@ void Simulation::showPreviousTweet() {
 			*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getContent().c_str();
 		}
 	}
-	catch (std::exception& e) {
+	catch (std::exception&) {
 		return;
 	}
 }

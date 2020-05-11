@@ -35,9 +35,9 @@ int main() {
 				}
 				break;
 			}
-		}
 
-		result = 0;
+			result = 0;
+		}
 	}
 
 	//If there's and error, it shows the error's message.

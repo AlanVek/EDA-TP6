@@ -29,7 +29,7 @@ protected:
 	virtual void lcdUpdateCursor();
 
 private:
-
+	//void reshape(const unsigned char*, const char*);
 	void paintCursor(bool);
 	int updatedPosition(const unsigned char*);
 	int lastCadd;

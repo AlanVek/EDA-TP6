@@ -177,9 +177,12 @@ basicLCD& concreteLCD::operator << (const unsigned char c) {
 basicLCD& concreteLCD::operator << (const unsigned char* c) {
 	unsigned int pos = 0;
 
+	/*const char* exp = _strdup((char*)c);
+	reshape(c, exp);*/
+
 	//Sets starting position according to remaining space in LCD.
 	if (strlen((char*)c) > (lcdWidth * lcdHeight - cadd + 1)) {
-		pos = updatedPosition(c);
+		pos = updatedPosition((const unsigned char*)c);
 	}
 
 	//Prints each character in the given array.
@@ -369,8 +372,10 @@ void concreteLCD::setAllegro(void) {
 		throw AllegroError(errors::al_font_load_fail_str, errors::al_font_load_fail_code);
 	}
 
-	background = al_map_rgb(169, 169, 169);
-	fontColor = al_map_rgb(0, 0, 0);
+	//background = al_map_rgb(169, 169, 169);
+	//fontColor = al_map_rgb(0, 0, 0);
+	background = al_map_rgb(0, 0, 0);
+	fontColor = al_map_rgb(255, 255, 255);
 
 	al_clear_to_color(background);
 
@@ -417,7 +422,6 @@ bool concreteLCD::isCharSupported(const char c) {
 				supportedChars.append(1, c);
 			}
 		}
-
 		return supported;
 	}
 	catch (std::exception&) {
@@ -429,12 +433,50 @@ bool concreteLCD::isCharSupported(const char c) {
 int concreteLCD::updatedPosition(const unsigned char* c) {
 	int tot = lcdWidth * lcdHeight - cadd + 1;
 	int count = 0;
+	char cc;
 	for (int i = strlen((char*)c) - 1; i > -1; i--) {
 		if (supportedChars.find(c[i]) != std::string::npos || isCharSupported(c[i])) {
 			count++;
 			if (count == tot)
-				return i;
+				return i + 1;
 		}
 	}
 	return 0;
 }
+
+/*Attempts to correct unsupported characters. NOT WORKING.*/
+
+//void concreteLCD::reshape(const unsigned char* c, const char* out) {
+//	std::string tempStr;
+//	char tempChar;
+//	for (int i = 0; i < strlen((char*)c); i++) {
+//		switch (c[i]) {
+//		case 'á':
+//			tempChar = 'a';
+//			break;
+//		case 'é':
+//			tempChar = 'e';
+//			break;
+//		case (char)161:
+//			tempChar = 'i';
+//			break;
+//		case (char)214:
+//			tempChar = 'I';
+//			break;
+//		case 'ó':
+//			tempChar = 'o';
+//			break;
+//		case 'ú':
+//			tempChar = 'u';
+//			break;
+//		case 'ñ':
+//			tempChar = 'n';
+//			break;
+//		default:
+//			tempChar = c[i];
+//			break;
+//		}
+//		tempStr.append(1, tempChar);
+//	}
+//	out = tempStr.c_str();
+//}

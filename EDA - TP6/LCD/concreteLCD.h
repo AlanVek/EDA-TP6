@@ -31,6 +31,7 @@ protected:
 private:
 
 	void paintCursor(bool);
+	int updatedPosition(const unsigned char*);
 	int lastCadd;
 	void setAllegro(void);
 	void eraseLetter();

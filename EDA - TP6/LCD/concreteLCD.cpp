@@ -173,14 +173,13 @@ basicLCD& concreteLCD::operator << (const unsigned char c) {
 	}
 	return *this;
 }
-
 //Prints array of chars in LCD.
 basicLCD& concreteLCD::operator << (const unsigned char* c) {
 	int pos = 0;
 
 	//Sets starting position according to remaining space in LCD.
 	if (strlen((char*)c) > (lcdWidth * lcdHeight - cadd + 1)) {
-		pos = strlen((char*)c) - lcdWidth * lcdHeight + cadd - 1;
+		pos = updatedPosition(c);
 	}
 
 	//Prints each character in the given array.
@@ -422,4 +421,17 @@ bool concreteLCD::isCharSupported(const char c) {
 	catch (std::exception& e) {
 		throw AllegroError(errors::ranges_fail_str, errors::ranges_fail_code);
 	}
+}
+
+int concreteLCD::updatedPosition(const unsigned char* c) {
+	int tot = lcdWidth * lcdHeight - cadd + 1;
+	int count = 0;
+	for (int i = strlen((char*)c) - 1; i > -1; i--) {
+		if (isCharSupported(c[i])) {
+			count++;
+			if (count == tot)
+				return i;
+		}
+	}
+	return 0;
 }

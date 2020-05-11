@@ -20,6 +20,8 @@ namespace {
 
 	const int loadedTC = 1;
 	const int requestedTweets = 2;
+
+	const int loadingDotsNumber = 3;
 }
 
 //Simulation constructor.
@@ -114,7 +116,7 @@ void Simulation::dispatch(int code) {
 		break;
 	case CLEAREOL:
 		if (!lcd->lcdClearToEOL())
-			throw std::exception("Failed to clear to EOL in LCD");
+			throw std::exception("Failed to clear to EOL in LCD.");
 		break;
 	}
 }
@@ -129,14 +131,14 @@ void Simulation::loadClient(const char* username, int tweetCount) {
 
 		//Shows username in LCD.
 		if (!lcd->lcdClear())
-			throw std::exception("Failed to clear LCD");
+			throw std::exception("Failed to clear LCD.");
 		*lcd << (unsigned char*)username;
 
 		loaded = loadedTC;
 	}
 	catch (API_request_error& e) {
 		if (!lcd->lcdClear())
-			throw std::exception("Failed to clear LCD");
+			throw std::exception("Failed to clear LCD.");
 		*lcd << (unsigned char*)e.what();
 	}
 }
@@ -228,7 +230,7 @@ void Simulation::showPreviousTweet() {
 		else {
 			tweetNumber--;
 			if (!lcd->lcdClear())
-				throw std::exception("Failed to clear LCD");
+				throw std::exception("Failed to clear LCD.");
 			*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getDate().c_str();
 			*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getContent().c_str();
 		}
@@ -237,25 +239,27 @@ void Simulation::showPreviousTweet() {
 		return;
 	}
 }
-
 void Simulation::loadingMessage(int* dots) {
 	cursorPosition temp;
 	temp.row = 1;
 	temp.column = 0;
-	//Clears second row.
-	if (!lcd->lcdSetCursorPosition(temp))
-		throw std::exception("Failed to set cursor's position.");
-	if (!lcd->lcdClearToEOL())
-		throw std::exception("Failed to clear to EOL in LCD");
 
-	//Writes "Requesting" plus 1,2 or 3 dots.
-	*lcd << (unsigned char*)"Requesting";
-	for (int i = 0; i < *dots; i++)
+	if (!*dots) {
+		//Clears second row.
+		if (!lcd->lcdSetCursorPosition(temp))
+			throw std::exception("Failed to set cursor's position.");
+		if (!lcd->lcdClearToEOL())
+			throw std::exception("Failed to clear to EOL in LCD.");
+
+		//Writes "Requesting" in LCD and then adds 1, 2 or 3 dots.
+		*lcd << (unsigned char*)"Requesting";
+	}
+	else {
 		*lcd << (unsigned char)'.';
 
+		if (*dots == loadingDotsNumber)
+			*dots = -1;
+	}
 	//Updates number of dots.
-	if (*dots == 3)
-		*dots = -1;
-
 	(*dots)++;
 }

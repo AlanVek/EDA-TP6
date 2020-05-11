@@ -1,6 +1,5 @@
 #include "TwitterClient.h"
 #include "API_request_error.h"
-#include <iostream>
 
 // Namespace with constants to use during API request.
 namespace {
@@ -227,11 +226,11 @@ void TwitterClient::loadTweetVector(const json& j) {
 	}
 }
 
-//Prints tweets.
-void TwitterClient::printTweets(void) const {
-	for (auto tw : tweetVector)
-		std::cout << tw << std::endl;
-}
+////Prints tweets.
+//void TwitterClient::printTweets(void) const {
+//	for (auto tw : tweetVector)
+//		std::cout << tw << std::endl;
+//}
 
 //Callback with string as userData.
 size_t writeCallback(char* ptr, size_t size, size_t nmemb, void* userData) {

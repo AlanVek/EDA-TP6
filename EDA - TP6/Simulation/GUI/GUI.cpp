@@ -8,10 +8,15 @@ namespace GUI_data {
 	const unsigned int width = 750;
 	const unsigned int height = 400;
 	const int MAXTWEETS = 50;
+
+	const double maxSpeed = 2.0;
+	const double minSpeed = 0.5;
+	const double speedStep = 0.05;
+	const double speedStepFast = 0.1;
 }
 
 //GUI constructor.
-GUI::GUI(void) :usernameOk(false), tweetCount(0) {
+GUI::GUI(void) :usernameOk(false), tweetCount(0), speed(1.0) {
 	username.clear();
 
 	//Initializes Allegro resources.
@@ -53,6 +58,7 @@ void GUI::initialSetup(void) {
 	al_clear_to_color(al_map_rgb(0, 0, 0));
 }
 
+#include <iostream>
 //First GUI run. Loops until a username has been given.
 bool GUI::firstRun(void) {
 	bool endOfSetUp = false;
@@ -89,7 +95,7 @@ bool GUI::firstRun(void) {
 			//Sets tweet number int input.
 			ImGui::Text("Tweets:   ");
 			ImGui::SameLine();
-			if (ImGui::InputInt(" ", &tweetCount)) {
+			if (ImGui::InputInt(" - ", &tweetCount)) {
 				if (tweetCount < 0)
 					tweetCount = 0;
 				if (tweetCount > GUI_data::MAXTWEETS)
@@ -203,6 +209,20 @@ codes GUI::checkStatus(void) {
 		ImGui::SameLine();
 		if (ImGui::Button("Next tweet"))
 			result = codes::NEXT;
+		ImGui::SameLine();
+		if (ImGui::Button("Reload tweet"))
+			result = codes::RELOAD;
+		ImGui::NewLine();
+		ImGui::Text("Roll speed:  ");
+		ImGui::SameLine();
+		if (ImGui::InputFloat("", &speed, GUI_data::speedStep, GUI_data::speedStepFast)) {
+			if (speed > GUI_data::maxSpeed)
+				speed = GUI_data::maxSpeed;
+			else if (speed < GUI_data::minSpeed)
+				speed = GUI_data::minSpeed;
+
+			result = codes::SPEED;
+		}
 
 		//Sets username text input and tweet number int input.
 		ImGui::NewLine();
@@ -216,7 +236,7 @@ codes GUI::checkStatus(void) {
 		}
 		ImGui::Text("Tweets:   ");
 		ImGui::SameLine();
-		if (ImGui::InputInt("", &tweetCount)) {
+		if (ImGui::InputInt(" - ", &tweetCount)) {
 			if (tweetCount < 0)
 				tweetCount = 0;
 			if (tweetCount > GUI_data::MAXTWEETS)
@@ -235,10 +255,8 @@ codes GUI::checkStatus(void) {
 			result = codes::CANCEL;
 		}
 
+		ImGui::NewLine();
 		//Sets "exit" button.
-		ImGui::NewLine();
-		ImGui::NewLine();
-		ImGui::NewLine();
 		if (ImGui::Button("Exit"))
 			result = codes::END;
 		ImGui::End();
@@ -264,3 +282,4 @@ GUI::~GUI() {
 //Getters.
 std::string& GUI::getUsername() { return username; }
 int GUI::getTweetCount(void) { return tweetCount; }
+float GUI::getSpeed(void) { return speed; }

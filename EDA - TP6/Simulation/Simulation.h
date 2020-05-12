@@ -43,8 +43,11 @@ private:
 
 	void showNextTweet();
 	void showPreviousTweet();
+	void reloadTweet();
 
 	ALLEGRO_TIMER* timer;
 	ALLEGRO_EVENT_QUEUE* queue;
 	ALLEGRO_EVENT ev;
+
+	double timeRoll;
 };

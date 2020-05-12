@@ -15,7 +15,9 @@ const enum class codes {
 	PREVIOUS,
 	CLEARALL,
 	CLEAREOL,
-	CANCEL
+	CANCEL,
+	RELOAD,
+	SPEED
 };
 
 class GUI {
@@ -32,6 +34,8 @@ public:
 	std::string& getUsername(void);
 	int getTweetCount(void);
 
+	float getSpeed(void);
+
 protected:
 	void initialSetup(void);
 
@@ -44,4 +48,5 @@ protected:
 
 	bool usernameOk;
 	int tweetCount;
+	float speed;
 };

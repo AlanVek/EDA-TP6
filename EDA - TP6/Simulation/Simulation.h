@@ -33,6 +33,8 @@ private:
 
 	bool rollTweets;
 
+	int positionRoll;
+
 	loadState loaded;
 
 	unsigned int tweetNumber;

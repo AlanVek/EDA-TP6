@@ -183,15 +183,19 @@ basicLCD& concreteLCD::operator << (const unsigned char* c) {
 	/*const char* exp = _strdup((char*)c);
 	reshape(c, exp);*/
 
-	//Sets starting position according to remaining space in LCD.
-	if (strlen((char*)c) > (LCD_data::lcdWidth * LCD_data::lcdHeight - cadd + 1)) {
-		pos = updatedPosition((const unsigned char*)c);
-	}
+	////Sets starting position according to remaining space in LCD.
+	//if (strlen((char*)c) > (LCD_data::lcdWidth * LCD_data::lcdHeight - cadd + 1)) {
+	//	pos = updatedPosition((const unsigned char*)c);
+	//}
 
 	//Prints each character in the given array.
 	while (pos < strlen((char*)c) && cadd <= LCD_data::lcdWidth * LCD_data::lcdHeight) {
-		*this << c[pos];
-		pos++;
+		if (cadd == LCD_data::lcdWidth)
+			*this << (unsigned char)'-';
+		else {
+			*this << c[pos];
+			pos++;
+		}
 	}
 	return *this;
 };
@@ -450,54 +454,17 @@ bool concreteLCD::isCharSupported(const char c) {
 	}
 }
 
-//Gets real position to start reading char array to print in LCD.
-int concreteLCD::updatedPosition(const unsigned char* c) {
-	int tot = LCD_data::lcdWidth * LCD_data::lcdHeight - cadd + 1;
-	int count = 0;
-	char cc;
-	for (int i = strlen((char*)c) - 1; i > -1; i--) {
-		if (supportedChars.find(c[i]) != std::string::npos || isCharSupported(c[i])) {
-			count++;
-			if (count == tot)
-				return i + 1;
-		}
-	}
-	return 0;
-}
-
-/*Attempts to correct unsupported characters. NOT WORKING.*/
-
-//void concreteLCD::reshape(const unsigned char* c, const char* out) {
-//	std::string tempStr;
-//	char tempChar;
-//	for (int i = 0; i < strlen((char*)c); i++) {
-//		switch (c[i]) {
-//		case 'á':
-//			tempChar = 'a';
-//			break;
-//		case 'é':
-//			tempChar = 'e';
-//			break;
-//		case (char)161:
-//			tempChar = 'i';
-//			break;
-//		case (char)214:
-//			tempChar = 'I';
-//			break;
-//		case 'ó':
-//			tempChar = 'o';
-//			break;
-//		case 'ú':
-//			tempChar = 'u';
-//			break;
-//		case 'ñ':
-//			tempChar = 'n';
-//			break;
-//		default:
-//			tempChar = c[i];
-//			break;
+////Gets real position to start reading char array to print in LCD.
+//int concreteLCD::updatedPosition(const unsigned char* c) {
+//	int tot = LCD_data::lcdWidth * LCD_data::lcdHeight - cadd + 1;
+//	int count = 0;
+//	char cc;
+//	for (int i = strlen((char*)c) - 1; i > -1; i--) {
+//		if (supportedChars.find(c[i]) != std::string::npos || isCharSupported(c[i])) {
+//			count++;
+//			if (count == tot)
+//				return i + 2;
 //		}
-//		tempStr.append(1, tempChar);
 //	}
-//	out = tempStr.c_str();
+//	return 0;
 //}

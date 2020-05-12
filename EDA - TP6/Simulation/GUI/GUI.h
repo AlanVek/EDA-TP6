@@ -14,7 +14,8 @@ const enum class codes {
 	NEXT,
 	PREVIOUS,
 	CLEARALL,
-	CLEAREOL
+	CLEAREOL,
+	CANCEL
 };
 
 class GUI {

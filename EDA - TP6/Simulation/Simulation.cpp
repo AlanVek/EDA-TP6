@@ -103,6 +103,8 @@ void Simulation::dispatch() {
 		if (!lcd->lcdClearToEOL())
 			throw std::exception("Failed to clear to EOL in LCD.");
 		break;
+	default:
+		break;
 	}
 }
 
@@ -153,6 +155,10 @@ void Simulation::performRequest(void) {
 
 			//Performs tweet request.
 			going = tc->requestTweets();
+
+			//Checks if user cancelled request.
+			if (gui->checkStatus() == codes::CANCEL)
+				going = false;
 		}
 
 		//Destroys timer resources.

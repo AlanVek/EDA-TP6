@@ -15,4 +15,5 @@ public:
 	~Tweet();
 private:
 	std::string username, content, date;
+	void transformData();
 };

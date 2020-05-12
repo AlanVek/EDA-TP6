@@ -1,4 +1,5 @@
 #include "Tweet.h"
+#include "boost/algorithm/string/replace.hpp"
 
 const char* monthToNumber(const std::string& month);
 
@@ -6,7 +7,7 @@ const char* monthToNumber(const std::string& month);
 //Expected date format:      28/03/10 - 18:17
 
 //Tweet constructor. Keeps username and content, and reshapes date into expected format.
-Tweet::Tweet(const std::string& username_, const std::string& content_, const std::string& date_) : username(username_), content(content_)
+Tweet::Tweet(const std::string& username_, const std::string& content_, const std::string& date_) : username(username_)
 {
 	std::string month = monthToNumber(date_.substr(4, 3));
 	std::string day = date_.substr(8, 2);
@@ -14,6 +15,10 @@ Tweet::Tweet(const std::string& username_, const std::string& content_, const st
 	std::string time = date_.substr(11, 5);
 
 	date = day + '/' + month + '/' + year + " - " + time;
+
+	content = username + " - " + content_.substr(0, content_.find("http"));
+
+	transformData();
 };
 
 Tweet::~Tweet() {};
@@ -63,4 +68,22 @@ const char* monthToNumber(const std::string& month) {
 		return "12";
 	else
 		return "00";
+}
+
+void Tweet::transformData() {
+	boost::replace_all(content, "á", "a");
+	boost::replace_all(content, "é", "e");
+	boost::replace_all(content, "í", "i");
+	boost::replace_all(content, "ó", "o");
+	boost::replace_all(content, "ú", "u");
+	boost::replace_all(content, "Á", "A");
+	boost::replace_all(content, "É", "E");
+	boost::replace_all(content, "Í", "I");
+	boost::replace_all(content, "Ó", "O");
+	boost::replace_all(content, "Ú", "U");
+	boost::replace_all(content, "ñ", "n");
+	boost::replace_all(content, "Ñ", "N");
+	boost::replace_all(content, "¿", "?");
+	boost::replace_all(content, "¡", "!");
+	boost::replace_all(content, "@", "_");
 }

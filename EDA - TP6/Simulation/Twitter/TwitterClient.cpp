@@ -1,5 +1,6 @@
 #include "TwitterClient.h"
 #include "API_request_error.h"
+#include "boost/locale.hpp"
 
 // Namespace with constants to use during API request.
 namespace {
@@ -207,7 +208,7 @@ void TwitterClient::loadTweetVector(const json& j) {
 		}
 
 		//Otherwise, it throws a generic error.
-		throw API_request_error("Unknown json error during request.");
+		throw std::exception("Unknown json error during request.");
 	}
 
 	//Attempts to load tweet vector or throws error if it wasn't possible.
@@ -215,8 +216,8 @@ void TwitterClient::loadTweetVector(const json& j) {
 		tweetVector.clear();
 		std::string content, date;
 		for (auto object : j) {
-			std::string content = object["text"];
-			std::string date = object["created_at"];
+			content = boost::locale::conv::from_utf<char>(object["text"], "ISO-8859-15");
+			date = boost::locale::conv::from_utf<char>(object["created_at"], "ISO-8859-15");
 			tweetVector.emplace_back(Tweet(username, content, date));
 		}
 	}

@@ -94,8 +94,6 @@ bool GUI::firstRun(void) {
 					tweetCount = 0;
 				if (tweetCount > GUI_data::MAXTWEETS)
 					tweetCount = GUI_data::MAXTWEETS;
-				if (tweetCount == 25)
-					endOfSetUp = true;
 			}
 			ImGui::NewLine();
 
@@ -225,11 +223,16 @@ codes GUI::checkStatus(void) {
 				tweetCount = GUI_data::MAXTWEETS;
 		}
 
-		//Sets "request" button.
+		//Sets "request" and "cancel request" buttons.
 		ImGui::NewLine();
 		if (ImGui::Button("Request tweets")) {
 			if (usernameOk)
 				result = codes::REQUEST;
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Cancel request")) {
+			result = codes::CANCEL;
 		}
 
 		//Sets "exit" button.

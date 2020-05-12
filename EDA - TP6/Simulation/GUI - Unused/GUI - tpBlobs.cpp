@@ -9,7 +9,7 @@ namespace {
 	const unsigned int width = 750;
 	const unsigned int height = 400;
 
-	const int NOTHING = 0;
+	const int NOTOK = 0;
 	const int USERNAMEOK = 1;
 	const int MAXTWEETS = 50;
 }
@@ -44,9 +44,10 @@ GUI::GUI(void) {
 	smellRadius = 0.0f;
 	pause = false;*/
 
-	dataEntered = NOTHING;
+	dataEntered = NOTOK;
 	request = false;
 	tweetCount = 0;
+
 	for (int i = 0; i < MAXUSERNAME; i++)
 		username[i] = 0;
 
@@ -89,9 +90,12 @@ void GUI::GUI_setUp(void) {
 }
 
 //Starting GUI setup, asking for amount of blobs, mode and speed (depending on mode).
-bool GUI::GUI_firstLoop(void) {
+bool GUI::firstRun(void) {
 	bool endOfSetUp = false;
 	bool result = true;
+	/*char userTemp[MAXUSERNAME];
+	for (int i = 0; i < MAXUSERNAME; i++)
+		userTemp[i] = 0;*/
 	al_set_target_backbuffer(guiDisp);
 
 	//Drawing loop.
@@ -114,7 +118,18 @@ bool GUI::GUI_firstLoop(void) {
 
 		//Button to select mode.
 		if (ImGui::InputText("Username ", username, MAXUSERNAME)) {
-			dataEntered = USERNAMEOK;
+			/*for (int i = 0; i < MAXUSERNAME; i++)
+				username[i] = 0;
+			int i = 0;
+			while (userTemp[i]) {
+				username[i] = userTemp[i];
+				i++;
+			}*/
+			if (strlen(username) > 0)
+				//if (i)
+				dataEntered = USERNAMEOK;
+			else
+				dataEntered = NOTOK;
 		}
 		if (ImGui::InputInt("Tweet amount ", &tweetCount)) {
 			if (tweetCount < 0)
@@ -123,8 +138,10 @@ bool GUI::GUI_firstLoop(void) {
 				tweetCount = MAXTWEETS;
 		}
 
-		if (ImGui::Button("Start request "))
-			endOfSetUp = true;
+		if (ImGui::Button("Start request ")) {
+			if (dataEntered == USERNAMEOK)
+				endOfSetUp = true;
+		}
 
 		ImGui::SameLine();
 		if (ImGui::Button("Exit")) {
@@ -170,63 +187,101 @@ bool GUI::checkGUIEvents(void) {
 }
 
 //Cycle that shows menu (called with every iteration).
-bool GUI::GUI_Game_Loop(void) {
+int GUI::checkGUIStatus(void) {
 	bool keepGoing = true;
-	bool result = true;
+	int result = NOTHING;
 
 	al_set_target_backbuffer(guiDisp);
 	if (checkGUIEvents()) {
-		result = false;
+		result = END;
 	}
-	ImGui::SetNextWindowSize(ImVec2(width, height));
-	ImGui::SetNextWindowPos(ImVec2(0, 0));
+	else {
+		ImGui::SetNextWindowSize(ImVec2(width, height));
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
 
-	ImGui_ImplAllegro5_NewFrame();
-	ImGui::NewFrame();
-	ImGui::SetNextWindowSize(ImVec2(width, height));
-	ImGui::SetNextWindowPos(ImVec2(0, 0));
-	ImGui::Begin("EDA - TP6");
+		ImGui_ImplAllegro5_NewFrame();
+		ImGui::NewFrame();
+		ImGui::SetNextWindowSize(ImVec2(width, height));
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
+		ImGui::Begin("EDA - TP6");
 
-	////Sets relative speed slider (both modes let the user define this parameter on the go).
-	//ImGui::SliderFloat("General relative speed", &relSpeed, minRelSpeedLimit, maxRelSpeedLimit);
+		if (ImGui::Button("Move cursor right"))
+			result = RIGHT;
+		else if (ImGui::Button("Move cursor left"))
+			result = LEFT;
+		else if (ImGui::Button("Move cursor down"))
+			result = DOWN;
+		else if (ImGui::Button("Move cursor up"))
+			result = UP;
+		else if (ImGui::Button("Clear LCD"))
+			result = CLEARALL;
+		else if (ImGui::Button("Clear to EOL"))
+			result = CLEAREOL;
+		else if (ImGui::Button("Next tweet"))
+			result = NEXT;
+		else if (ImGui::Button("Previous tweet"))
+			result = PREVIOUS;
+		else if (ImGui::Button("Request tweets")) {
+			if (dataEntered == USERNAMEOK)
+				result = REQUEST;
+		}
+		else if (ImGui::Button("Exit"))
+			result = END;
 
-	////Sets sliders for death probabilities.
-	//ImGui::SliderFloat("Death probability - Baby Blob", &babyDeathProb, 0.0f, MAXDEATHPROB);
-	//ImGui::SliderFloat("Death probability - Grown Blob", &grownDeathProb, 0.0f, MAXDEATHPROB);
-	//ImGui::SliderFloat("Death probability - Good Old Blob", &goodOldDeathProb, 0.0f, MAXDEATHPROB);
-	//ImGui::SliderFloat("Random Jiggle Limit", &randomJL, minRandomJiggleLimit, maxRandomJiggleLimit);
+		if (ImGui::InputText("Username ", username, MAXUSERNAME)) {
+			if (strlen(username))
+				dataEntered = USERNAMEOK;
+			else
+				dataEntered = NOTOK;
+		}
+		if (ImGui::InputInt("Tweet amount ", &tweetCount)) {
+			if (tweetCount < 0)
+				tweetCount = 0;
+			if (tweetCount > MAXTWEETS)
+				tweetCount = MAXTWEETS;
+		}
 
-	////Sets input bars for smell radius(float), random jiggle limit(float) and food count (int).
-	//if (ImGui::InputInt("Smell radius", &smellRadius)) {
-	//	if (smellRadius < minSmellRadiusLimit)
-	//		smellRadius = minSmellRadiusLimit;
-	//	else if (smellRadius > maxSmellRadiusLimit)
-	//		smellRadius = maxSmellRadiusLimit;
-	//}
-	//if (ImGui::InputInt("Food count", &foodCount)) {
-	//	if (foodCount < minFoodCountLimit)
-	//		foodCount = minFoodCountLimit;
-	//	else if (foodCount > maxFoodCountLimit)
-	//		foodCount = maxFoodCountLimit;
-	//}
+		////Sets relative speed slider (both modes let the user define this parameter on the go).
+		//ImGui::SliderFloat("General relative speed", &relSpeed, minRelSpeedLimit, maxRelSpeedLimit);
 
-	////Sets pause button.
-	//if (ImGui::Button("Pause"))
-	//	pause = !pause;
+		////Sets sliders for death probabilities.
+		//ImGui::SliderFloat("Death probability - Baby Blob", &babyDeathProb, 0.0f, MAXDEATHPROB);
+		//ImGui::SliderFloat("Death probability - Grown Blob", &grownDeathProb, 0.0f, MAXDEATHPROB);
+		//ImGui::SliderFloat("Death probability - Good Old Blob", &goodOldDeathProb, 0.0f, MAXDEATHPROB);
+		//ImGui::SliderFloat("Random Jiggle Limit", &randomJL, minRandomJiggleLimit, maxRandomJiggleLimit);
 
-	////Shows current state next to button.
-	//ImGui::SameLine();
-	//ImGui::Text("%s", pause ? "Paused" : "Unpaused");
+		////Sets input bars for smell radius(float), random jiggle limit(float) and food count (int).
+		//if (ImGui::InputInt("Smell radius", &smellRadius)) {
+		//	if (smellRadius < minSmellRadiusLimit)
+		//		smellRadius = minSmellRadiusLimit;
+		//	else if (smellRadius > maxSmellRadiusLimit)
+		//		smellRadius = maxSmellRadiusLimit;
+		//}
+		//if (ImGui::InputInt("Food count", &foodCount)) {
+		//	if (foodCount < minFoodCountLimit)
+		//		foodCount = minFoodCountLimit;
+		//	else if (foodCount > maxFoodCountLimit)
+		//		foodCount = maxFoodCountLimit;
+		//}
 
-	//ImGui::Text("Game will end when either user presses ESC or all blobs die. :)");
+		////Sets pause button.
+		//if (ImGui::Button("Pause"))
+		//	pause = !pause;
 
-	ImGui::End();
+		////Shows current state next to button.
+		//ImGui::SameLine();
+		//ImGui::Text("%s", pause ? "Paused" : "Unpaused");
 
-	ImGui::Render();
-	al_clear_to_color(al_map_rgb(0, 0, 0));
-	ImGui_ImplAllegro5_RenderDrawData(ImGui::GetDrawData());
+		//ImGui::Text("Game will end when either user presses ESC or all blobs die. :)");
 
-	al_flip_display();
+		ImGui::End();
+
+		ImGui::Render();
+		al_clear_to_color(al_map_rgb(0, 0, 0));
+		ImGui_ImplAllegro5_RenderDrawData(ImGui::GetDrawData());
+
+		al_flip_display();
+	}
 	return result;
 }
 
@@ -239,3 +294,6 @@ GUI::~GUI() {
 	if (guiQueue)
 		al_destroy_event_queue(guiQueue);
 }
+
+const char* GUI::getUsername() { return username; }
+int GUI::getTweetCount(void) { return tweetCount; }

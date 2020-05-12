@@ -3,27 +3,6 @@
 #include <string>
 #include "Twitter/API_request_error.h"
 
-namespace {
-	const int NOTHING = 0;
-	const int DOWN = 1;
-	const int UP = 2;
-	const int LEFT = 3;
-	const int RIGHT = 4;
-	const int REQUEST = 5;
-	const int LOAD = 6;
-	const int END = 7;
-	const int NEXT = 8;
-	const int PREVIOUS = 9;
-	const int SETCURSOR = 10;
-	const int CLEARALL = 11;
-	const int CLEAREOL = 12;
-
-	const int loadedTC = 1;
-	const int requestedTweets = 2;
-
-	const int loadingDotsNumber = 3;
-}
-
 //Simulation constructor.
 Simulation::Simulation(void) : running(true), loaded(0)
 {
@@ -47,12 +26,15 @@ Simulation::Simulation(void) : running(true), loaded(0)
 
 	//Requests TwitterClient token.
 	tc->requestToken();
-
-	gui->GUI_setUp();
 }
 
 void Simulation::getFirstData(void) {
-	running = gui->GUI_firstLoop();
+	running = gui->firstRun();
+	if (running) {
+		tweetNumber = 0;
+		loadClient(gui->getUsername(), gui->getTweetCount());
+		performRequest();
+	}
 }
 
 //Simulation destructor. Deletes used resources.
@@ -67,7 +49,7 @@ Simulation::~Simulation() {
 
 //Polls GUI and dispatches according to button code.
 void Simulation::dispatch(int code) {
-	code = gui->GUI_Game_Loop();
+	code = gui->checkGUIStatus();
 	/*int code = gui->pressed();*/
 	switch (code) {
 	case NOTHING:
@@ -91,13 +73,12 @@ void Simulation::dispatch(int code) {
 			throw std::exception("Failed to move cursor right.");
 		break;
 	case REQUEST:
-		if (loaded == loadedTC) {
-			tweetNumber = 0;
-			performRequest();
-		}
+		tweetNumber = 0;
+		loadClient(gui->getUsername(), gui->getTweetCount());
+		performRequest();
 		break;
 	case LOAD:
-		loadClient("AlanVekselman", 35);
+		break;
 		/*loadClient(gui->getUsername(), gui->getTweetCount());*/
 		break;
 	case END:

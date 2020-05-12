@@ -3,8 +3,28 @@
 #include <allegro5/allegro.h>
 
 namespace {
+	const int NOTHING = 0;
+	const int DOWN = 1;
+	const int UP = 2;
+	const int LEFT = 3;
+	const int RIGHT = 4;
+	const int REQUEST = 5;
+	const int LOAD = 6;
+	const int END = 7;
+	const int NEXT = 8;
+	const int PREVIOUS = 9;
+	const int SETCURSOR = 10;
+	const int CLEARALL = 11;
+	const int CLEAREOL = 12;
+
+	const int loadedTC = 1;
+	const int requestedTweets = 2;
+
+	const int loadingDotsNumber = 3;
+
 	const unsigned int MAXUSERNAME = 100;
 }
+
 class GUI {
 public:
 
@@ -12,20 +32,16 @@ public:
 
 	~GUI();
 
-	bool GUI_Game_Loop(void);
+	int checkGUIStatus(void);
 
-	void GUI_setUp(void);
+	bool firstRun(void);
 
-	bool GUI_firstLoop(void);
-
-	void setDependencies(void);
-
-	/*float relSpeed, maxSpeed;
-	float randomJL, babyDeathProb, grownDeathProb, goodOldDeathProb;
-	int foodCount, blobCount, smellRadius;
-	bool mode, pause;*/
+	const char* getUsername(void);
+	int getTweetCount(void);
 
 protected:
+	void GUI_setUp(void);
+
 	ALLEGRO_DISPLAY* guiDisp;
 	ALLEGRO_EVENT_QUEUE* guiQueue;
 	ALLEGRO_EVENT guiEvent;

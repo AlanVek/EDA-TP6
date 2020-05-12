@@ -2,8 +2,12 @@
 #include <exception>
 #include "Twitter/API_request_error.h"
 
+namespace {
+	const int loadingDotsNumber = 3;
+}
+
 //Simulation constructor.
-Simulation::Simulation(void) : running(true), loaded(loadState::notLoaded)
+Simulation::Simulation(void) : running(true), loaded(loadState::notLoaded), tweetNumber(NULL)
 {
 	//Attempts to create new LCD and TwitterClient.
 	lcd = new (std::nothrow) concreteLCD;
@@ -27,10 +31,14 @@ Simulation::Simulation(void) : running(true), loaded(loadState::notLoaded)
 		throw std::exception("Failed to allocate memory for GUI.");
 }
 
+//Gets first data input from GUI.
 void Simulation::getFirstData(void) {
+	/*If user asked to leave, running will be False
+	and program will exit.*/
 	running = gui->firstRun();
+
+	//Otherwise, it loads client and requests tweets.
 	if (running) {
-		tweetNumber = 0;
 		loadClient(gui->getUsername().c_str(), gui->getTweetCount());
 		performRequest();
 	}

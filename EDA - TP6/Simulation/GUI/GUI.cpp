@@ -14,6 +14,7 @@ namespace GUI_data {
 GUI::GUI(void) :usernameOk(false), tweetCount(0) {
 	username.clear();
 
+	//Initializes Allegro resources.
 	if (!(al_install_keyboard()))
 		throw std::exception("Failed to initialize keyboard addon.");
 	if (!(al_install_mouse()))
@@ -31,7 +32,7 @@ GUI::GUI(void) :usernameOk(false), tweetCount(0) {
 
 	initialSetup();
 }
-//Set up for GUI.
+//Set up for GUI with ImGUI.
 void GUI::initialSetup(void) {
 	al_set_target_backbuffer(guiDisp);
 
@@ -52,7 +53,7 @@ void GUI::initialSetup(void) {
 	al_clear_to_color(al_map_rgb(0, 0, 0));
 }
 
-//Starting GUI setup, asking for amount of blobs, mode and speed (depending on mode).
+//First GUI run. Loops until a username has been given.
 bool GUI::firstRun(void) {
 	bool endOfSetUp = false;
 	bool result = true;
@@ -77,11 +78,15 @@ bool GUI::firstRun(void) {
 			ImGui::Begin("Initial Setup");
 
 			ImGui::NewLine();
+
+			//Sets username text input.
 			ImGui::Text("Username: ");
 			ImGui::SameLine();
 			if (ImGui::InputText(" ~ ", &username)) {
 				usernameOk = username.length();
 			}
+
+			//Sets tweet number int input.
 			ImGui::Text("Tweets:   ");
 			ImGui::SameLine();
 			if (ImGui::InputInt(" ", &tweetCount)) {
@@ -93,12 +98,16 @@ bool GUI::firstRun(void) {
 					endOfSetUp = true;
 			}
 			ImGui::NewLine();
+
+			//Sets "request" button.
 			if (ImGui::Button("Request tweets")) {
 				endOfSetUp = usernameOk;
 			}
 			ImGui::NewLine();
 			ImGui::NewLine();
 			ImGui::NewLine();
+
+			//Sets "exit" button.
 			if (ImGui::Button("Exit")) {
 				endOfSetUp = true;
 				result = false;
@@ -116,7 +125,8 @@ bool GUI::firstRun(void) {
 	}
 	return result;
 }
-
+/*Checks if user pressed ESC or closed display.
+It also deals with display resizing.*/
 bool GUI::checkGUIEvents(void) {
 	bool result = false;
 
@@ -125,8 +135,7 @@ bool GUI::checkGUIEvents(void) {
 	{
 		ImGui_ImplAllegro5_ProcessEvent(&guiEvent);
 
-		/*If the display has been closed or if the user has pressed ESC,
-		 the program ends. */
+		/*If the display has been closed or if the user has pressed ESC, return true. */
 		if (guiEvent.type == ALLEGRO_EVENT_DISPLAY_CLOSE || (guiEvent.type == ALLEGRO_EVENT_KEY_DOWN &&
 			guiEvent.keyboard.keycode == ALLEGRO_KEY_ESCAPE))
 			result = true;
@@ -145,19 +154,27 @@ bool GUI::checkGUIEvents(void) {
 //Cycle that shows menu (called with every iteration).
 codes GUI::checkStatus(void) {
 	bool keepGoing = true;
+
+	//By default, it returns codes::NOTHING.
 	codes result = codes::NOTHING;
 
 	al_set_target_backbuffer(guiDisp);
+
+	//If user pressed ESC or closed display, returns codes::END.
 	if (checkGUIEvents()) {
 		result = codes::END;
 	}
 	else {
+		//Sets new ImGUI frame.
 		ImGui_ImplAllegro5_NewFrame();
 		ImGui::NewFrame();
+
+		//Sets new window.
 		ImGui::SetNextWindowSize(ImVec2(GUI_data::width, GUI_data::height));
 		ImGui::SetNextWindowPos(ImVec2(0, 0));
 		ImGui::Begin("EDA - TP6");
 
+		//Sets cursor buttons.
 		ImGui::Text("Cursor buttons:");
 		if (ImGui::Button("Move cursor left"))
 			result = codes::LEFT;
@@ -171,14 +188,16 @@ codes GUI::checkStatus(void) {
 		if (ImGui::Button("Move cursor up"))
 			result = codes::UP;
 
+		//Sets clear buttons.
 		ImGui::NewLine();
-		ImGui::Text("Clears:");
+		ImGui::Text("Clear buttons:");
 		if (ImGui::Button("Clear LCD"))
 			result = codes::CLEARALL;
 		ImGui::SameLine();
 		if (ImGui::Button("Clear to EOL"))
 			result = codes::CLEAREOL;
 
+		//Sets tweet handling buttons.
 		ImGui::NewLine();
 		ImGui::Text("Tweet buttons:");
 		if (ImGui::Button("Previous tweet"))
@@ -187,6 +206,7 @@ codes GUI::checkStatus(void) {
 		if (ImGui::Button("Next tweet"))
 			result = codes::NEXT;
 
+		//Sets username text input and tweet number int input.
 		ImGui::NewLine();
 		ImGui::Text("Twitter data input: ");
 		ImGui::NewLine();
@@ -204,11 +224,15 @@ codes GUI::checkStatus(void) {
 			if (tweetCount > GUI_data::MAXTWEETS)
 				tweetCount = GUI_data::MAXTWEETS;
 		}
+
+		//Sets "request" button.
 		ImGui::NewLine();
 		if (ImGui::Button("Request tweets")) {
 			if (usernameOk)
 				result = codes::REQUEST;
 		}
+
+		//Sets "exit" button.
 		ImGui::NewLine();
 		ImGui::NewLine();
 		ImGui::NewLine();
@@ -216,6 +240,7 @@ codes GUI::checkStatus(void) {
 			result = codes::END;
 		ImGui::End();
 
+		//Rendering.
 		ImGui::Render();
 		al_clear_to_color(al_map_rgb(0, 0, 0));
 		ImGui_ImplAllegro5_RenderDrawData(ImGui::GetDrawData());
@@ -225,15 +250,14 @@ codes GUI::checkStatus(void) {
 	return result;
 }
 
+//Cleanup. Frees resources.
 GUI::~GUI() {
-	//Cleanup.
 	ImGui_ImplAllegro5_Shutdown();
 	ImGui::DestroyContext();
-	/*if (guiDisp)
-		al_destroy_display(guiDisp);*/
 	if (guiQueue)
 		al_destroy_event_queue(guiQueue);
 }
 
+//Getters.
 std::string& GUI::getUsername() { return username; }
 int GUI::getTweetCount(void) { return tweetCount; }

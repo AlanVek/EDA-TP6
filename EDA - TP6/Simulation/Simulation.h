@@ -9,10 +9,6 @@ const enum class loadState {
 	requestedTweets,
 };
 
-namespace {
-	const int loadingDotsNumber = 3;
-}
-
 class Simulation {
 public:
 	Simulation(void);

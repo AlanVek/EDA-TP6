@@ -10,12 +10,10 @@ public:
 
 	TwitterClient(void);
 
-	void requestToken(void);
+	void initialSetup(void);
 	bool requestTweets(void);
 
-	void printTweets(void) const;
-
-	std::vector<Tweet>& getTweets();
+	const std::vector<Tweet>& getTweets() const;
 
 	void newUsername(const char*);
 	void newTweetCount(int);

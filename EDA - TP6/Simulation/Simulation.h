@@ -21,6 +21,7 @@ public:
 	void getFirstData(void);
 
 private:
+	Simulation(const Simulation&) {};
 	void loadClient(const char*, int = NULL);
 	void performRequest(void);
 
@@ -33,7 +34,7 @@ private:
 
 	bool rollTweets;
 
-	int positionRoll;
+	unsigned int positionRoll;
 
 	loadState loaded;
 
@@ -48,6 +49,4 @@ private:
 	ALLEGRO_TIMER* timer;
 	ALLEGRO_EVENT_QUEUE* queue;
 	ALLEGRO_EVENT ev;
-
-	double timeRoll;
 };

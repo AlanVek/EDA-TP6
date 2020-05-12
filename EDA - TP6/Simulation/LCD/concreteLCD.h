@@ -29,13 +29,13 @@ protected:
 	virtual void lcdUpdateCursor();
 
 private:
-	void paintCursor(bool);
+	void paintCursor(bool) const;
 	//int updatedPosition(const unsigned char*);
 	int lastCadd;
 	void setAllegro(void);
 
 	bool isChar;
-	void eraseLetter();
+	void eraseLetter() const;
 
 	bool isCharSupported(const char);
 

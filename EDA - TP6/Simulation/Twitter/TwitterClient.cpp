@@ -76,7 +76,7 @@ void TwitterClient::configurateTokenClient(void) {
 	curl_easy_setopt(handler, CURLOPT_WRITEDATA, &unparsedAnswer);
 }
 //Gets Token.
-void TwitterClient::requestToken(void) {
+void TwitterClient::initialSetup(void) {
 	//Creates and verifies handler.
 	handler = curl_easy_init();
 
@@ -202,7 +202,7 @@ void TwitterClient::loadTweetVector(const json& j) {
 	//If there's been an error in the request...
 	if (j.find("errors") != j.end()) {
 		//If any of them has the code invalidUsername, it throws that error.
-		for (auto x : j["errors"]) {
+		for (auto& x : j["errors"]) {
 			if (x["code"] == invalidUsername)
 				throw API_request_error("Username doesn't exist.");
 		}
@@ -215,7 +215,7 @@ void TwitterClient::loadTweetVector(const json& j) {
 	try {
 		tweetVector.clear();
 		std::string content, date;
-		for (auto object : j) {
+		for (auto& object : j) {
 			content = boost::locale::conv::from_utf<char>(object["text"], "ISO-8859-15");
 			date = boost::locale::conv::from_utf<char>(object["created_at"], "ISO-8859-15");
 			tweetVector.emplace_back(Tweet(username, content, date));
@@ -226,12 +226,6 @@ void TwitterClient::loadTweetVector(const json& j) {
 	}
 }
 
-////Prints tweets.
-//void TwitterClient::printTweets(void) const {
-//	for (auto tw : tweetVector)
-//		std::cout << tw << std::endl;
-//}
-
 //Callback with string as userData.
 size_t writeCallback(char* ptr, size_t size, size_t nmemb, void* userData) {
 	std::string* userDataPtr = (std::string*) userData;
@@ -241,7 +235,7 @@ size_t writeCallback(char* ptr, size_t size, size_t nmemb, void* userData) {
 	return size * nmemb;
 }
 
-std::vector<Tweet>& TwitterClient::getTweets() { return tweetVector; }
+const std::vector<Tweet>& TwitterClient::getTweets() const { return tweetVector; }
 
 //Sets new username.
 void TwitterClient::newUsername(const char* username_) {

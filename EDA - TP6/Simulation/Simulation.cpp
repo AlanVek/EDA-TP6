@@ -18,8 +18,8 @@ Simulation::Simulation(void) : running(true), loaded(loadState::notLoaded), twee
 	lcd = new (std::nothrow) concreteLCD;
 	tc = new (std::nothrow) TwitterClient;
 
-	//Requests TwitterClient token.
-	tc->requestToken();
+	//Performs TwitterClient initial setup.
+	tc->initialSetup();
 
 	gui = new (std::nothrow) GUI;
 
@@ -41,7 +41,6 @@ Simulation::Simulation(void) : running(true), loaded(loadState::notLoaded), twee
 		throw std::exception("Failed to crete event queue.");
 
 	al_register_event_source(queue, al_get_timer_event_source(timer));
-	timeRoll = timeRollInit;
 }
 
 //Gets first data input from GUI.
@@ -131,7 +130,7 @@ void Simulation::dispatch() {
 		loaded = loadState::notLoaded;
 		break;
 	case codes::SPEED:
-		temp = timeRoll / gui->getSpeed();
+		temp = timeRollInit / gui->getSpeed();
 		if (rollTweets && temp <= maxTimeRoll && temp >= minTimeRoll) {
 			al_set_timer_speed(timer, temp);
 		}
@@ -320,7 +319,7 @@ void Simulation::loadingMessage(int* dots) {
 }
 
 void Simulation::roll(void) {
-	int totTweets = tc->getTweets().size();
+	unsigned int totTweets = tc->getTweets().size();
 	if (totTweets && tweetNumber < totTweets) {
 		std::string tweet = tc->getTweets()[tweetNumber].getContent();
 

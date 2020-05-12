@@ -173,14 +173,6 @@ basicLCD& concreteLCD::operator << (const unsigned char* c) {
 
 	isChar = false;
 
-	/*const char* exp = _strdup((char*)c);
-	reshape(c, exp);*/
-
-	////Sets starting position according to remaining space in LCD.
-	//if (strlen((char*)c) > (LCD_data::lcdWidth * LCD_data::lcdHeight - cadd + 1)) {
-	//	pos = updatedPosition((const unsigned char*)c);
-	//}
-
 	//Prints each character in the given array.
 	while (pos < strlen((char*)c) && cadd <= LCD_data::lcdWidth * LCD_data::lcdHeight) {
 		/*if (cadd == LCD_data::lcdWidth)
@@ -340,7 +332,7 @@ void concreteLCD::lcdUpdateCursor() {
 
 /*According to the 'show' bool, it either draws the
 new cursor or erases the old one. */
-void concreteLCD::paintCursor(bool show) {
+void concreteLCD::paintCursor(bool show) const {
 	al_set_target_backbuffer(display);
 
 	try {
@@ -377,14 +369,6 @@ void concreteLCD::setAllegro(void) {
 	if (!al_init()) {
 		throw AllegroError(errors::al_fail_str, errors::al_fail_code);
 	}
-
-	/*else if (!al_install_mouse()) {
-		throw AllegroError(errors::al_mouse_fail_str, errors::al_mouse_fail_code);
-	}
-
-	else if (!al_install_keyboard()) {
-		throw AllegroError(errors::al_keyboard_fail_str, errors::al_keyboard_fail_code);
-	}*/
 	else if (!al_init_primitives_addon()) {
 		throw AllegroError(errors::al_primitives_fail_str, errors::al_primitives_fail_code);
 	}
@@ -397,9 +381,6 @@ void concreteLCD::setAllegro(void) {
 	else if (!(font = al_load_ttf_font(LCD_data::fontName, LCD_data::letterHeight, 0))) {
 		throw AllegroError(errors::al_font_load_fail_str, errors::al_font_load_fail_code);
 	}
-
-	//background = al_map_rgb(169, 169, 169);
-	//fontColor = al_map_rgb(0, 0, 0);
 	background = al_map_rgb(0, 0, 0);
 	fontColor = al_map_rgb(255, 255, 255);
 
@@ -417,7 +398,7 @@ concreteLCD::~concreteLCD() {
 }
 
 //Erases a letter from LCD.
-void concreteLCD::eraseLetter() {
+void concreteLCD::eraseLetter() const {
 	al_set_target_backbuffer(display);
 
 	try {
@@ -443,11 +424,13 @@ bool concreteLCD::isCharSupported(const char c) {
 		int allRanges = al_get_font_ranges(font, LCD_data::maxRanges, ranges);
 		bool supported = false;
 
-		//Checks for character in each range.
-		for (int i = 0; i < (allRanges / 2) && (supported == false); i++) {
-			if (c > ranges[2 * i] && c < ranges[2 * i + 1]) {
-				supported = true;
-				supportedChars.append(1, c);
+		if (allRanges != -1) {
+			//Checks for character in each range.
+			for (int i = 0; i < (allRanges / 2) && (supported == false); i++) {
+				if (c > ranges[2 * i] && c < ranges[2 * i + 1]) {
+					supported = true;
+					supportedChars.append(1, c);
+				}
 			}
 		}
 		return supported;
@@ -456,18 +439,3 @@ bool concreteLCD::isCharSupported(const char c) {
 		throw AllegroError(errors::ranges_fail_str, errors::ranges_fail_code);
 	}
 }
-
-////Gets real position to start reading char array to print in LCD.
-//int concreteLCD::updatedPosition(const unsigned char* c) {
-//	int tot = LCD_data::lcdWidth * LCD_data::lcdHeight - cadd + 1;
-//	int count = 0;
-//	char cc;
-//	for (int i = strlen((char*)c) - 1; i > -1; i--) {
-//		if (supportedChars.find(c[i]) != std::string::npos || isCharSupported(c[i])) {
-//			count++;
-//			if (count == tot)
-//				return i + 2;
-//		}
-//	}
-//	return 0;
-//}

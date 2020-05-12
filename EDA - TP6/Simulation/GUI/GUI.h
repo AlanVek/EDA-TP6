@@ -27,17 +27,17 @@ public:
 
 	~GUI();
 
-	codes checkStatus(void);
+	const codes checkStatus(void);
 
 	bool firstRun(void);
 
-	std::string& getUsername(void);
-	int getTweetCount(void);
+	const std::string& getUsername(void) const;
+	const int getTweetCount(void) const;
 
-	float getSpeed(void);
+	const float getSpeed(void) const;
 
 protected:
-	void initialSetup(void);
+	void initialSetup(void) const;
 
 	ALLEGRO_DISPLAY* guiDisp;
 	ALLEGRO_EVENT_QUEUE* guiQueue;

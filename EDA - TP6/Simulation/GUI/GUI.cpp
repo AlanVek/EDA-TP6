@@ -38,7 +38,7 @@ GUI::GUI(void) :usernameOk(false), tweetCount(0), speed(1.0) {
 	initialSetup();
 }
 //Set up for GUI with ImGUI.
-void GUI::initialSetup(void) {
+void GUI::initialSetup(void) const {
 	al_set_target_backbuffer(guiDisp);
 
 	// Setup Dear ImGui context
@@ -156,7 +156,7 @@ bool GUI::checkGUIEvents(void) {
 }
 
 //Cycle that shows menu (called with every iteration).
-codes GUI::checkStatus(void) {
+const codes GUI::checkStatus(void) {
 	bool keepGoing = true;
 
 	//By default, it returns codes::NOTHING.
@@ -280,6 +280,6 @@ GUI::~GUI() {
 }
 
 //Getters.
-std::string& GUI::getUsername() { return username; }
-int GUI::getTweetCount(void) { return tweetCount; }
-float GUI::getSpeed(void) { return speed; }
+const std::string& GUI::getUsername() const { return username; }
+const int GUI::getTweetCount(void) const { return tweetCount; }
+const float GUI::getSpeed(void) const { return speed; }

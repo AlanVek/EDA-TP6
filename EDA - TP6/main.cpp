@@ -11,6 +11,8 @@ int main() {
 	try {
 		Simulation sim;
 
+		sim.getFirstData();
+
 		while (sim.isRunning()) {
 			/*Dispatch should get cc from GUI, not from console.
 			It's just to test it.*/

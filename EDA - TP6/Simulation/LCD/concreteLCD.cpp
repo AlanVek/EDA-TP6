@@ -90,6 +90,8 @@ int concreteLCD::lcdGetError() { return errorCode; };
 //Clears LCD screen.
 bool concreteLCD::lcdClear() {
 	bool result = false;
+	al_set_target_backbuffer(display);
+
 	try {
 		//Clears to background color and updates cursor.
 		al_clear_to_color(background);
@@ -110,6 +112,8 @@ bool concreteLCD::lcdClear() {
 
 //Clears from cursor to end of line.
 bool concreteLCD::lcdClearToEOL() {
+	al_set_target_backbuffer(display);
+
 	bool result = false;
 	int aux = cadd;
 
@@ -136,6 +140,8 @@ bool concreteLCD::lcdClearToEOL() {
 
 //Prints a letter in LCD.
 basicLCD& concreteLCD::operator << (const unsigned char c) {
+	al_set_target_backbuffer(display);
+
 	//Sets letter's position in X and Y.
 	long int posX = letterWidth * ((cadd - 1) % lcdWidth);
 	long int posY = letterHeight * ((cadd - 1) / lcdWidth);
@@ -195,6 +201,8 @@ basicLCD& concreteLCD::operator << (const unsigned char* c) {
 
 //Moves cursor up with error checking.
 bool concreteLCD::lcdMoveCursorUp() {
+	al_set_target_backbuffer(display);
+
 	if (cadd > lcdWidth) {
 		lastCadd = cadd;
 		cadd -= lcdWidth;
@@ -215,6 +223,8 @@ bool concreteLCD::lcdMoveCursorUp() {
 
 //Moves cursor down with error checking.
 bool concreteLCD::lcdMoveCursorDown() {
+	al_set_target_backbuffer(display);
+
 	if (cadd <= lcdWidth) {
 		lastCadd = cadd;
 		cadd += lcdWidth;
@@ -236,6 +246,8 @@ bool concreteLCD::lcdMoveCursorDown() {
 
 //Moves cursor right with error checking.
 bool concreteLCD::lcdMoveCursorRight() {
+	al_set_target_backbuffer(display);
+
 	if (cadd < lcdWidth * lcdHeight) {
 		lastCadd = cadd;
 		cadd++;
@@ -257,6 +269,8 @@ bool concreteLCD::lcdMoveCursorRight() {
 
 //Moves cursor left with error checking.
 bool concreteLCD::lcdMoveCursorLeft() {
+	al_set_target_backbuffer(display);
+
 	if (cadd > 1) {
 		lastCadd = cadd;
 		cadd--;
@@ -277,6 +291,8 @@ bool concreteLCD::lcdMoveCursorLeft() {
 
 //Sets cursor position with error checking and draws it.
 bool concreteLCD::lcdSetCursorPosition(const cursorPosition pos) {
+	al_set_target_backbuffer(display);
+
 	if (pos.column < lcdWidth && pos.row < height) {
 		lastCadd = cadd;
 		cadd = pos.row * lcdWidth + pos.column + 1;
@@ -297,6 +313,8 @@ bool concreteLCD::lcdSetCursorPosition(const cursorPosition pos) {
 
 //Returns cursor position.
 cursorPosition concreteLCD::lcdGetCursorPosition() {
+	al_set_target_backbuffer(display);
+
 	cursorPosition temp;
 
 	temp.row = ((cadd - 1) / lcdWidth);
@@ -307,6 +325,8 @@ cursorPosition concreteLCD::lcdGetCursorPosition() {
 
 //Erases previous cursor and draws new one.
 void concreteLCD::lcdUpdateCursor() {
+	al_set_target_backbuffer(display);
+
 	paintCursor(false);
 
 	paintCursor(true);
@@ -317,6 +337,8 @@ void concreteLCD::lcdUpdateCursor() {
 /*According to the 'show' bool, it either draws the
 new cursor or erases the old one. */
 void concreteLCD::paintCursor(bool show) {
+	al_set_target_backbuffer(display);
+
 	try {
 		ALLEGRO_COLOR tempColor;
 		int tempPos;
@@ -392,6 +414,8 @@ concreteLCD::~concreteLCD() {
 
 //Erases a letter from LCD.
 void concreteLCD::eraseLetter() {
+	al_set_target_backbuffer(display);
+
 	try {
 		//Sets position in X and Y.
 		long int posX_init = letterWidth * ((cadd - 1) % lcdWidth);

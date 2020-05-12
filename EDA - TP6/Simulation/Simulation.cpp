@@ -31,7 +31,7 @@ Simulation::Simulation(void) : running(true), loaded(0)
 	lcd = new (std::nothrow) concreteLCD;
 	tc = new (std::nothrow) TwitterClient;
 
-	/*gui = new GUI;*/
+	gui = new (std::nothrow) GUI;
 
 	//Checks for errors.
 	if (!lcd)
@@ -41,10 +41,18 @@ Simulation::Simulation(void) : running(true), loaded(0)
 		throw std::exception(errStr.c_str());
 	}
 	if (!tc)
-		throw std::exception("Failed to create Twitter client.");
+		throw std::exception("Failed to allocate memory for Twitter client.");
+	if (!gui)
+		throw std::exception("Failed to allocate memory for GUI.");
 
 	//Requests TwitterClient token.
 	tc->requestToken();
+
+	gui->GUI_setUp();
+}
+
+void Simulation::getFirstData(void) {
+	running = gui->GUI_firstLoop();
 }
 
 //Simulation destructor. Deletes used resources.
@@ -59,6 +67,7 @@ Simulation::~Simulation() {
 
 //Polls GUI and dispatches according to button code.
 void Simulation::dispatch(int code) {
+	code = gui->GUI_Game_Loop();
 	/*int code = gui->pressed();*/
 	switch (code) {
 	case NOTHING:

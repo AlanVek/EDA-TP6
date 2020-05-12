@@ -2,8 +2,10 @@
 
 #include <allegro5/allegro.h>
 
-class GUI{
-
+namespace {
+	const unsigned int MAXUSERNAME = 100;
+}
+class GUI {
 public:
 
 	GUI();
@@ -18,15 +20,21 @@ public:
 
 	void setDependencies(void);
 
-	float relSpeed, maxSpeed;
+	/*float relSpeed, maxSpeed;
 	float randomJL, babyDeathProb, grownDeathProb, goodOldDeathProb;
 	int foodCount, blobCount, smellRadius;
-	bool mode, pause;
+	bool mode, pause;*/
 
 protected:
 	ALLEGRO_DISPLAY* guiDisp;
 	ALLEGRO_EVENT_QUEUE* guiQueue;
 	ALLEGRO_EVENT guiEvent;
 	bool checkGUIEvents(void);
-};
 
+	char username[MAXUSERNAME];
+
+	int dataEntered;
+
+	bool request;
+	int tweetCount;
+};

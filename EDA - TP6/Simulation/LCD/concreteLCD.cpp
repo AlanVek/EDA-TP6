@@ -19,47 +19,37 @@ namespace LCD_data {
 
 // Namespace with error codes and meanings.
 namespace errors {
-	const unsigned int al_fail_code = 1;
 	const char* al_fail_str = "Failed while attempting to initialize Allegro.";
-
-	const unsigned int al_mouse_fail_code = 2;
 	const char* al_mouse_fail_str = "Failed while attempting to initialize mouse addon.";
-
-	const unsigned int al_keyboard_fail_code = 3;
 	const char* al_keyboard_fail_str = "Failed while attempting to initialize keyboard addon.";
-
-	const unsigned int al_primitives_fail_code = 4;
 	const char* al_primitives_fail_str = "Failed while attempting to initialize primitives addon.";
-
-	const unsigned int al_ttf_fail_code = 5;
 	const char* al_ttf_fail_str = "Failed while attempting to initialize ttf addon.";
-
-	const unsigned int al_font_load_fail_code = 6;
 	const char* al_font_load_fail_str = "Failed while attempting to load font.";
-
-	const unsigned int al_display_fail_code = 7;
 	const char* al_display_fail_str = "Failed while attempting to create display";
-
-	const unsigned int al_color_fail_code = 8;
 	const char* al_color_fail_str = "Failed while attempting clear_to_color.";
-
-	const unsigned int clear_EOL_fail_code = 9;
 	const char* clear_EOL_fail_str = "Failed while attempting to clear to EOL.";
-
-	const unsigned int write_fail_code = 10;
 	const char* write_fail_str = "Failed while attempting to write character.";
-
-	const unsigned int paint_cursor_fail_code = 11;
 	const char* paint_cursor_fail_str = "Failed while attempting to erase or show cursor.";
-
-	const unsigned int erase_fail_code = 12;
 	const char* erase_fail_str = "Failed while attempting to erase letter.";
-
-	const unsigned int unknown_fail_code = 13;
+	const char* ranges_fail_str = "Failed while attempting to validate char in font.";
 	const char* unknown_fail_str = "Unknown error.";
 
-	const unsigned int ranges_fail_code = 14;
-	const char* ranges_fail_str = "Failed while attempting to validate char in font.";
+	enum {
+		al_fail_code,
+		al_mouse_fail_code,
+		al_keyboard_fail_code,
+		al_primitives_fail_code,
+		al_ttf_fail_code,
+		al_font_load_fail_code,
+		al_display_fail_code,
+		al_color_fail_code,
+		clear_EOL_fail_code,
+		write_fail_code,
+		paint_cursor_fail_code,
+		erase_fail_code,
+		unknown_fail_code,
+		ranges_fail_code
+	};
 }
 
 //concreteLCD constructor.
@@ -166,7 +156,8 @@ basicLCD& concreteLCD::operator << (const unsigned char c) {
 		//Updates cursor and cursor values.
 		lastCadd = cadd;
 		cadd++;
-		lcdUpdateCursor();
+		if (isChar)
+			lcdUpdateCursor();
 	}
 	catch (AllegroError& e) {
 		errorCode = e.code();
@@ -180,6 +171,8 @@ basicLCD& concreteLCD::operator << (const unsigned char c) {
 basicLCD& concreteLCD::operator << (const unsigned char* c) {
 	unsigned int pos = 0;
 
+	isChar = false;
+
 	/*const char* exp = _strdup((char*)c);
 	reshape(c, exp);*/
 
@@ -190,13 +183,23 @@ basicLCD& concreteLCD::operator << (const unsigned char* c) {
 
 	//Prints each character in the given array.
 	while (pos < strlen((char*)c) && cadd <= LCD_data::lcdWidth * LCD_data::lcdHeight) {
-		if (cadd == LCD_data::lcdWidth)
+		/*if (cadd == LCD_data::lcdWidth)
 			*this << (unsigned char)'-';
-		else {
-			*this << c[pos];
-			pos++;
-		}
+		else {*/
+		*this << c[pos];
+		pos++;
+		//}
 	}
+	try {
+		lcdUpdateCursor();
+	}
+	catch (AllegroError& e) {
+		errorCode = e.code();
+	}
+	catch (std::exception&) {
+		errorCode = errors::write_fail_code;
+	}
+	isChar = true;
 	return *this;
 };
 
@@ -422,7 +425,7 @@ void concreteLCD::eraseLetter() {
 		long int posX_init = LCD_data::letterWidth * ((cadd - 1) % LCD_data::lcdWidth);
 		long int posY_init = LCD_data::letterHeight * ((cadd - 1) / LCD_data::lcdWidth);
 		long int posX_fin = posX_init + LCD_data::letterWidth;
-		long int posY_fin = posY_init + LCD_data::letterHeight - 2 * LCD_data::lineWidth;
+		long int posY_fin = posY_init + LCD_data::letterHeight;
 
 		//Draws rectangle over letter.
 		al_draw_filled_rectangle(posX_init, posY_init, posX_fin, posY_fin, background);

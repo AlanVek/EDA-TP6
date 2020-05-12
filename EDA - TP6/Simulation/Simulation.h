@@ -24,10 +24,14 @@ private:
 	void loadClient(const char*, int = NULL);
 	void performRequest(void);
 
+	void roll();
+
 	basicLCD* lcd;
 	TwitterClient* tc;
 	GUI* gui;
 	bool running;
+
+	bool rollTweets;
 
 	loadState loaded;
 
@@ -37,4 +41,8 @@ private:
 
 	void showNextTweet();
 	void showPreviousTweet();
+
+	ALLEGRO_TIMER* timer;
+	ALLEGRO_EVENT_QUEUE* queue;
+	ALLEGRO_EVENT ev;
 };

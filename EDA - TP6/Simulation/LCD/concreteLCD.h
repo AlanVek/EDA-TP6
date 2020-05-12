@@ -33,6 +33,8 @@ private:
 	//int updatedPosition(const unsigned char*);
 	int lastCadd;
 	void setAllegro(void);
+
+	bool isChar;
 	void eraseLetter();
 
 	bool isCharSupported(const char);

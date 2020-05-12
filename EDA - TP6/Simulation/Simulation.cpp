@@ -4,10 +4,11 @@
 
 namespace {
 	const int loadingDotsNumber = 3;
+	const double timeRoll = 0.15;
 }
 
 //Simulation constructor.
-Simulation::Simulation(void) : running(true), loaded(loadState::notLoaded), tweetNumber(NULL)
+Simulation::Simulation(void) : running(true), loaded(loadState::notLoaded), tweetNumber(NULL), rollTweets(false)
 {
 	//Attempts to create new LCD and TwitterClient.
 	lcd = new (std::nothrow) concreteLCD;
@@ -29,6 +30,13 @@ Simulation::Simulation(void) : running(true), loaded(loadState::notLoaded), twee
 		throw std::exception("Failed to allocate memory for Twitter client.");
 	if (!gui)
 		throw std::exception("Failed to allocate memory for GUI.");
+
+	if (!(timer = al_create_timer(timeRoll)))
+		throw std::exception("Failed to create timer.");
+	if (!(queue = al_create_event_queue()))
+		throw std::exception("Failed to crete event queue.");
+
+	al_register_event_source(queue, al_get_timer_event_source(timer));
 }
 
 //Gets first data input from GUI.
@@ -41,7 +49,9 @@ void Simulation::getFirstData(void) {
 	if (running) {
 		loadClient(gui->getUsername().c_str(), gui->getTweetCount());
 		performRequest();
+		rollTweets = true;
 	}
+	al_start_timer(timer);
 }
 
 //Simulation destructor. Deletes used resources.
@@ -52,6 +62,10 @@ Simulation::~Simulation() {
 		delete tc;
 	if (gui)
 		delete gui;
+	if (timer)
+		al_destroy_timer(timer);
+	if (queue)
+		al_destroy_event_queue(queue);
 }
 
 //Polls GUI and dispatches according to button code.
@@ -60,8 +74,8 @@ void Simulation::dispatch() {
 
 	switch (code) {
 	case codes::NOTHING:
-		/*Roll display...*/
-		/*Or show next tweet...*/
+		if (al_get_next_event(queue, &ev) && rollTweets)
+			roll();
 		break;
 	case codes::DOWN:
 		if (!lcd->lcdMoveCursorDown())
@@ -98,10 +112,12 @@ void Simulation::dispatch() {
 	case codes::CLEARALL:
 		if (!lcd->lcdClear())
 			throw std::exception("Failed to clear LCD.");
+		rollTweets = false;
 		break;
 	case codes::CLEAREOL:
 		if (!lcd->lcdClearToEOL())
 			throw std::exception("Failed to clear to EOL in LCD.");
+		rollTweets = false;
 		break;
 	default:
 		break;
@@ -143,7 +159,7 @@ void Simulation::performRequest(void) {
 
 	//Attempts to set timer resources.
 	try {
-		timer = al_create_timer(0.1);
+		timer = al_create_timer(timeRoll * 2.0 / 3.0);
 		queue = al_create_event_queue();
 		al_register_event_source(queue, al_get_timer_event_source(timer));
 		al_start_timer(timer);
@@ -172,6 +188,7 @@ void Simulation::performRequest(void) {
 			*lcd << (unsigned char*)tc->getTweets()[0].getDate().c_str();
 			*lcd << (unsigned char*)tc->getTweets()[0].getContent().c_str();
 			loaded = loadState::requestedTweets;
+			rollTweets = true;
 		}
 		else {
 			*lcd << (unsigned char*)"No tweets.";
@@ -189,6 +206,7 @@ void Simulation::performRequest(void) {
 //Getter.
 bool Simulation::isRunning(void) { return running; }
 
+#include <iostream>
 //Shows next tweet or shows error message in lcd if there are no more tweets.
 void Simulation::showNextTweet() {
 	try {
@@ -202,11 +220,13 @@ void Simulation::showNextTweet() {
 
 		//Shows next tweet and updates tweetNumber.
 		else {
+			std::cout << tweetNumber << std::endl;
 			tweetNumber++;
 			if (!lcd->lcdClear())
 				throw std::exception("Failed to clear LCD");
 			*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getDate().c_str();
 			*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getContent().c_str();
+			rollTweets = true;
 		}
 	}
 	catch (std::exception&) {
@@ -229,6 +249,7 @@ void Simulation::showPreviousTweet() {
 				throw std::exception("Failed to clear LCD.");
 			*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getDate().c_str();
 			*lcd << (unsigned char*)tc->getTweets()[tweetNumber].getContent().c_str();
+			rollTweets = true;
 		}
 	}
 	catch (std::exception&) {
@@ -258,4 +279,30 @@ void Simulation::loadingMessage(int* dots) {
 	}
 	//Updates number of dots.
 	(*dots)++;
+}
+
+void Simulation::roll(void) {
+	static int positionRoll = 0;
+	int totTweets = tc->getTweets().size();
+	if (totTweets && tweetNumber < totTweets) {
+		std::string tweet;
+		tweet = tc->getTweets()[tweetNumber].getContent();
+
+		if (positionRoll < tweet.length())
+		{
+			cursorPosition temp; temp.row = 1; temp.column = 0;
+			if (!lcd->lcdSetCursorPosition(temp))
+				throw std::exception("Failed to set cursor position.");
+			if (!lcd->lcdClearToEOL())
+				throw std::exception("Failed to clear to EOL.");
+
+			*lcd << (unsigned char*)tweet.substr(positionRoll, tweet.size() - positionRoll).c_str();
+			positionRoll++;
+		}
+		else
+		{
+			showNextTweet();
+			positionRoll = 0;
+		}
+	}
 }

@@ -3,21 +3,18 @@
 #include <allegro5/allegro_primitives.h>
 
 // Namespace with constants to use during program.
-namespace {
-	const unsigned int width = 800;
-	const unsigned int height = 192;
-	const unsigned int lcdWidth = 16;
-	const unsigned int lcdHeight = 2;
-	const unsigned int letterWidth = width / lcdWidth;
-	const unsigned int letterHeight = height / lcdHeight;
+namespace LCD_data {
+	const unsigned int	width = 800;
+	const unsigned int	height = 192;
+	const unsigned int	lcdWidth = 16;
+	const unsigned int	lcdHeight = 2;
+	const unsigned int	letterWidth = width / lcdWidth;
+	const unsigned int	letterHeight = height / lcdHeight;
+	const unsigned int	spaceASCII = 32;
+	const unsigned int	lineWidth = width / 160;
+	const unsigned int	maxRanges = 50;
 
 	const char* fontName = "Fonts/LCD-6.ttf";
-
-	const int spaceASCII = 32;
-
-	const unsigned int lineWidth = width / 160;
-
-	const unsigned int maxRanges = 50;
 }
 
 // Namespace with error codes and meanings.
@@ -120,7 +117,7 @@ bool concreteLCD::lcdClearToEOL() {
 	try {
 		//While still inside LCD range...
 		int col = lcdGetCursorPosition().column;
-		while (col < lcdWidth - 1) {
+		while (col < LCD_data::lcdWidth - 1) {
 			//Erases letter and moves cursor.
 			eraseLetter();
 			col = lcdGetCursorPosition().column;
@@ -143,12 +140,12 @@ basicLCD& concreteLCD::operator << (const unsigned char c) {
 	al_set_target_backbuffer(display);
 
 	//Sets letter's position in X and Y.
-	long int posX = letterWidth * ((cadd - 1) % lcdWidth);
-	long int posY = letterHeight * ((cadd - 1) / lcdWidth);
+	long int posX = LCD_data::letterWidth * ((cadd - 1) % LCD_data::lcdWidth);
+	long int posY = LCD_data::letterHeight * ((cadd - 1) / LCD_data::lcdWidth);
 
 	try {
 		//If it's not a space...
-		if (c != spaceASCII) {
+		if (c != LCD_data::spaceASCII) {
 			//If character is not supported, it skips it.
 			if (supportedChars.find(c) == std::string::npos && !isCharSupported(c))
 				return *this;
@@ -187,12 +184,12 @@ basicLCD& concreteLCD::operator << (const unsigned char* c) {
 	reshape(c, exp);*/
 
 	//Sets starting position according to remaining space in LCD.
-	if (strlen((char*)c) > (lcdWidth * lcdHeight - cadd + 1)) {
+	if (strlen((char*)c) > (LCD_data::lcdWidth * LCD_data::lcdHeight - cadd + 1)) {
 		pos = updatedPosition((const unsigned char*)c);
 	}
 
 	//Prints each character in the given array.
-	while (pos < strlen((char*)c) && cadd <= lcdWidth * lcdHeight) {
+	while (pos < strlen((char*)c) && cadd <= LCD_data::lcdWidth * LCD_data::lcdHeight) {
 		*this << c[pos];
 		pos++;
 	}
@@ -203,9 +200,9 @@ basicLCD& concreteLCD::operator << (const unsigned char* c) {
 bool concreteLCD::lcdMoveCursorUp() {
 	al_set_target_backbuffer(display);
 
-	if (cadd > lcdWidth) {
+	if (cadd > LCD_data::lcdWidth) {
 		lastCadd = cadd;
-		cadd -= lcdWidth;
+		cadd -= LCD_data::lcdWidth;
 	}
 	bool result = false;
 	try {
@@ -225,9 +222,9 @@ bool concreteLCD::lcdMoveCursorUp() {
 bool concreteLCD::lcdMoveCursorDown() {
 	al_set_target_backbuffer(display);
 
-	if (cadd <= lcdWidth) {
+	if (cadd <= LCD_data::lcdWidth) {
 		lastCadd = cadd;
-		cadd += lcdWidth;
+		cadd += LCD_data::lcdWidth;
 	}
 
 	bool result = false;
@@ -248,7 +245,7 @@ bool concreteLCD::lcdMoveCursorDown() {
 bool concreteLCD::lcdMoveCursorRight() {
 	al_set_target_backbuffer(display);
 
-	if (cadd < lcdWidth * lcdHeight) {
+	if (cadd < LCD_data::lcdWidth * LCD_data::lcdHeight) {
 		lastCadd = cadd;
 		cadd++;
 	}
@@ -293,9 +290,9 @@ bool concreteLCD::lcdMoveCursorLeft() {
 bool concreteLCD::lcdSetCursorPosition(const cursorPosition pos) {
 	al_set_target_backbuffer(display);
 
-	if (pos.column < lcdWidth && pos.row < height) {
+	if (pos.column < LCD_data::lcdWidth && pos.row < LCD_data::height) {
 		lastCadd = cadd;
-		cadd = pos.row * lcdWidth + pos.column + 1;
+		cadd = pos.row * LCD_data::lcdWidth + pos.column + 1;
 	}
 	bool result = false;
 	try {
@@ -317,8 +314,8 @@ cursorPosition concreteLCD::lcdGetCursorPosition() {
 
 	cursorPosition temp;
 
-	temp.row = ((cadd - 1) / lcdWidth);
-	temp.column = (cadd - 1) % lcdWidth;
+	temp.row = ((cadd - 1) / LCD_data::lcdWidth);
+	temp.column = (cadd - 1) % LCD_data::lcdWidth;
 
 	return temp;
 };
@@ -356,12 +353,12 @@ void concreteLCD::paintCursor(bool show) {
 		}
 
 		//Sets X and Y positions for line drawing.
-		long int posX_init = letterWidth * ((tempPos - 1) % lcdWidth);
-		long int posY_init = letterHeight * ((tempPos - 1) / lcdWidth + 1) - lineWidth;
-		long int posX_fin = posX_init + letterWidth - lineWidth;
+		long int posX_init = LCD_data::letterWidth * ((tempPos - 1) % LCD_data::lcdWidth);
+		long int posY_init = LCD_data::letterHeight * ((tempPos - 1) / LCD_data::lcdWidth + 1) - LCD_data::lineWidth;
+		long int posX_fin = posX_init + LCD_data::letterWidth - LCD_data::lineWidth;
 
 		//Draws cursor.
-		al_draw_line(posX_init, posY_init, posX_fin, posY_init, tempColor, lineWidth);
+		al_draw_line(posX_init, posY_init, posX_fin, posY_init, tempColor, LCD_data::lineWidth);
 	}
 	catch (std::exception&) {
 		throw AllegroError(errors::paint_cursor_fail_str, errors::paint_cursor_fail_code);
@@ -387,10 +384,10 @@ void concreteLCD::setAllegro(void) {
 	else if (!al_init_ttf_addon()) {
 		throw AllegroError(errors::al_ttf_fail_str, errors::al_ttf_fail_code);
 	}
-	else if (!(display = al_create_display(width, height))) {
+	else if (!(display = al_create_display(LCD_data::width, LCD_data::height))) {
 		throw AllegroError(errors::al_display_fail_str, errors::al_display_fail_code);
 	}
-	else if (!(font = al_load_ttf_font(fontName, letterHeight, 0))) {
+	else if (!(font = al_load_ttf_font(LCD_data::fontName, LCD_data::letterHeight, 0))) {
 		throw AllegroError(errors::al_font_load_fail_str, errors::al_font_load_fail_code);
 	}
 
@@ -418,10 +415,10 @@ void concreteLCD::eraseLetter() {
 
 	try {
 		//Sets position in X and Y.
-		long int posX_init = letterWidth * ((cadd - 1) % lcdWidth);
-		long int posY_init = letterHeight * ((cadd - 1) / lcdWidth);
-		long int posX_fin = posX_init + letterWidth;
-		long int posY_fin = posY_init + letterHeight - 2 * lineWidth;
+		long int posX_init = LCD_data::letterWidth * ((cadd - 1) % LCD_data::lcdWidth);
+		long int posY_init = LCD_data::letterHeight * ((cadd - 1) / LCD_data::lcdWidth);
+		long int posX_fin = posX_init + LCD_data::letterWidth;
+		long int posY_fin = posY_init + LCD_data::letterHeight - 2 * LCD_data::lineWidth;
 
 		//Draws rectangle over letter.
 		al_draw_filled_rectangle(posX_init, posY_init, posX_fin, posY_fin, background);
@@ -433,10 +430,10 @@ void concreteLCD::eraseLetter() {
 //Checks if character is supported by font.
 bool concreteLCD::isCharSupported(const char c) {
 	try {
-		int ranges[maxRanges];
+		int ranges[LCD_data::maxRanges];
 
 		//Gets font's ranges.
-		int allRanges = al_get_font_ranges(font, maxRanges, ranges);
+		int allRanges = al_get_font_ranges(font, LCD_data::maxRanges, ranges);
 		bool supported = false;
 
 		//Checks for character in each range.
@@ -455,7 +452,7 @@ bool concreteLCD::isCharSupported(const char c) {
 
 //Gets real position to start reading char array to print in LCD.
 int concreteLCD::updatedPosition(const unsigned char* c) {
-	int tot = lcdWidth * lcdHeight - cadd + 1;
+	int tot = LCD_data::lcdWidth * LCD_data::lcdHeight - cadd + 1;
 	int count = 0;
 	char cc;
 	for (int i = strlen((char*)c) - 1; i > -1; i--) {

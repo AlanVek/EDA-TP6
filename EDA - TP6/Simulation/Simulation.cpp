@@ -1,14 +1,16 @@
 #include "Simulation.h"
 #include <exception>
-#include <string>
 #include "Twitter/API_request_error.h"
 
 //Simulation constructor.
-Simulation::Simulation(void) : running(true), loaded(0)
+Simulation::Simulation(void) : running(true), loaded(loadState::notLoaded)
 {
 	//Attempts to create new LCD and TwitterClient.
 	lcd = new (std::nothrow) concreteLCD;
 	tc = new (std::nothrow) TwitterClient;
+
+	//Requests TwitterClient token.
+	tc->requestToken();
 
 	gui = new (std::nothrow) GUI;
 
@@ -23,16 +25,13 @@ Simulation::Simulation(void) : running(true), loaded(0)
 		throw std::exception("Failed to allocate memory for Twitter client.");
 	if (!gui)
 		throw std::exception("Failed to allocate memory for GUI.");
-
-	//Requests TwitterClient token.
-	tc->requestToken();
 }
 
 void Simulation::getFirstData(void) {
 	running = gui->firstRun();
 	if (running) {
 		tweetNumber = 0;
-		loadClient(gui->getUsername(), gui->getTweetCount());
+		loadClient(gui->getUsername().c_str(), gui->getTweetCount());
 		performRequest();
 	}
 }
@@ -43,68 +42,56 @@ Simulation::~Simulation() {
 		delete lcd;
 	if (tc)
 		delete tc;
-	/*if (gui)
-		delete gui;*/
+	if (gui)
+		delete gui;
 }
 
 //Polls GUI and dispatches according to button code.
-void Simulation::dispatch(int code) {
-	code = gui->checkGUIStatus();
-	/*int code = gui->pressed();*/
+void Simulation::dispatch() {
+	codes code = gui->checkStatus();
+
 	switch (code) {
-	case NOTHING:
+	case codes::NOTHING:
 		/*Roll display...*/
 		/*Or show next tweet...*/
 		break;
-	case DOWN:
+	case codes::DOWN:
 		if (!lcd->lcdMoveCursorDown())
 			throw std::exception("Failed to move cursor down.");
 		break;
-	case UP:
+	case codes::UP:
 		if (!lcd->lcdMoveCursorUp())
 			throw std::exception("Failed to move cursor up.");
 		break;
-	case LEFT:
+	case codes::LEFT:
 		if (!lcd->lcdMoveCursorLeft())
 			throw std::exception("Failed to move cursor left.");
 		break;
-	case RIGHT:
+	case codes::RIGHT:
 		if (!lcd->lcdMoveCursorRight())
 			throw std::exception("Failed to move cursor right.");
 		break;
-	case REQUEST:
+	case codes::REQUEST:
 		tweetNumber = 0;
-		loadClient(gui->getUsername(), gui->getTweetCount());
+		loadClient(gui->getUsername().c_str(), gui->getTweetCount());
 		performRequest();
 		break;
-	case LOAD:
-		break;
-		/*loadClient(gui->getUsername(), gui->getTweetCount());*/
-		break;
-	case END:
+	case codes::END:
 		running = false;
 		break;
-	case NEXT:
-		if (loaded == requestedTweets)
+	case codes::NEXT:
+		if (loaded == loadState::requestedTweets)
 			showNextTweet();
 		break;
-	case PREVIOUS:
-		if (loaded == requestedTweets)
+	case codes::PREVIOUS:
+		if (loaded == loadState::requestedTweets)
 			showPreviousTweet();
 		break;
-	case SETCURSOR:
-		cursorPosition temp;
-		temp.column = 0; temp.row = 0;
-		/*temp.column = gui->newCursorColumn();
-		temp.row = gui->newCursorRow();*/
-		if (!lcd->lcdSetCursorPosition(temp))
-			throw std::exception("Failed to change cursor's position.");
-		break;
-	case CLEARALL:
+	case codes::CLEARALL:
 		if (!lcd->lcdClear())
 			throw std::exception("Failed to clear LCD.");
 		break;
-	case CLEAREOL:
+	case codes::CLEAREOL:
 		if (!lcd->lcdClearToEOL())
 			throw std::exception("Failed to clear to EOL in LCD.");
 		break;
@@ -124,7 +111,7 @@ void Simulation::loadClient(const char* username, int tweetCount) {
 			throw std::exception("Failed to clear LCD.");
 		*lcd << (unsigned char*)username;
 
-		loaded = loadedTC;
+		loaded = loadState::loadedTC;
 	}
 	catch (API_request_error& e) {
 		if (!lcd->lcdClear())
@@ -167,10 +154,15 @@ void Simulation::performRequest(void) {
 		//Clears LCD and writes first tweet's date and content.
 		if (!lcd->lcdClear())
 			throw std::exception("Failed to clear LCD");
-		*lcd << (unsigned char*)tc->getTweets()[0].getDate().c_str();
-		*lcd << (unsigned char*)tc->getTweets()[0].getContent().c_str();
-
-		loaded = requestedTweets;
+		if (tc->getTweets().size()) {
+			*lcd << (unsigned char*)tc->getTweets()[0].getDate().c_str();
+			*lcd << (unsigned char*)tc->getTweets()[0].getContent().c_str();
+			loaded = loadState::requestedTweets;
+		}
+		else {
+			*lcd << (unsigned char*)"No tweets.";
+			loaded = loadState::notLoaded;
+		}
 	}
 	//If it's a Twitter error, it shows it on display.
 	catch (API_request_error& e) {

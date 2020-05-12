@@ -1,14 +1,24 @@
 #pragma once
 #include "Twitter/TwitterClient.h"
 #include "LCD/concreteLCD.h"
-#include "GUI - Unused/GUI - tpBlobs.h"
+#include "GUI/GUI.h"
+
+const enum class loadState {
+	notLoaded,
+	loadedTC,
+	requestedTweets,
+};
+
+namespace {
+	const int loadingDotsNumber = 3;
+}
 
 class Simulation {
 public:
 	Simulation(void);
 	~Simulation(void);
 
-	void dispatch(int);
+	void dispatch(void);
 
 	bool isRunning(void);
 
@@ -23,7 +33,7 @@ private:
 	GUI* gui;
 	bool running;
 
-	int loaded;
+	loadState loaded;
 
 	unsigned int tweetNumber;
 

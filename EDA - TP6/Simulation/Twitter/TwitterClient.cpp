@@ -32,7 +32,7 @@ TwitterClient::TwitterClient(const std::string& username_, const int& tweetCount
 		else throw API_request_error("Invalid tweet amount.");
 	}
 	else
-		throw API_request_error("Invalid username.");
+		throw API_request_error("Invalid username");
 }
 
 TwitterClient::TwitterClient(void) {
@@ -74,7 +74,6 @@ void TwitterClient::configurateTokenClient(void) {
 	curl_easy_setopt(handler, CURLOPT_WRITEFUNCTION, &writeCallback);
 	curl_easy_setopt(handler, CURLOPT_WRITEDATA, &unparsedAnswer);
 }
-
 //Gets Token.
 void TwitterClient::requestToken(void) {
 	//Creates and verifies handler.
@@ -194,7 +193,7 @@ bool TwitterClient::requestTweets(void) {
 			throw API_request_error("Invalid tweet amount.");
 	}
 	else
-		throw API_request_error("Invalid username.");
+		throw API_request_error("Invalid username");
 }
 
 //Loads vector with tweets and checks for errors.
@@ -250,7 +249,7 @@ void TwitterClient::newUsername(const char* username_) {
 		query = userLink + username + countCode + std::to_string(tweetCount);
 	}
 	else {
-		throw API_request_error("Invalid username.");
+		throw API_request_error("Invalid username");
 	}
 }
 

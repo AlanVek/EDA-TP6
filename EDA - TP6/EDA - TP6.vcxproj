@@ -148,12 +148,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Simulation\GUI - Unused\GUI - tpBlobs.cpp" />
-    <ClCompile Include="Simulation\GUI - Unused\imgui\imgui.cpp" />
-    <ClCompile Include="Simulation\GUI - Unused\imgui\imgui_demo.cpp" />
-    <ClCompile Include="Simulation\GUI - Unused\imgui\imgui_draw.cpp" />
-    <ClCompile Include="Simulation\GUI - Unused\imgui\imgui_impl_allegro5.cpp" />
-    <ClCompile Include="Simulation\GUI - Unused\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="Simulation\GUI\GUI.cpp" />
+    <ClCompile Include="Simulation\GUI\imgui\imgui.cpp" />
+    <ClCompile Include="Simulation\GUI\imgui\imgui_demo.cpp" />
+    <ClCompile Include="Simulation\GUI\imgui\imgui_draw.cpp" />
+    <ClCompile Include="Simulation\GUI\imgui\imgui_impl_allegro5.cpp" />
+    <ClCompile Include="Simulation\GUI\imgui\imgui_stdlib.cpp" />
+    <ClCompile Include="Simulation\GUI\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Simulation\LCD\AllegroError.cpp" />
     <ClCompile Include="Simulation\LCD\concreteLCD.cpp" />
     <ClCompile Include="Simulation\Simulation.cpp" />
@@ -162,14 +163,15 @@
     <ClCompile Include="Simulation\Twitter\TwitterClient.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Simulation\GUI - Unused\GUI - tpBlobs.h" />
-    <ClInclude Include="Simulation\GUI - Unused\imgui\imconfig.h" />
-    <ClInclude Include="Simulation\GUI - Unused\imgui\imgui.h" />
-    <ClInclude Include="Simulation\GUI - Unused\imgui\imgui_impl_allegro5.h" />
-    <ClInclude Include="Simulation\GUI - Unused\imgui\imgui_internal.h" />
-    <ClInclude Include="Simulation\GUI - Unused\imgui\imstb_rectpack.h" />
-    <ClInclude Include="Simulation\GUI - Unused\imgui\imstb_textedit.h" />
-    <ClInclude Include="Simulation\GUI - Unused\imgui\imstb_truetype.h" />
+    <ClInclude Include="Simulation\GUI\GUI.h" />
+    <ClInclude Include="Simulation\GUI\imgui\imconfig.h" />
+    <ClInclude Include="Simulation\GUI\imgui\imgui.h" />
+    <ClInclude Include="Simulation\GUI\imgui\imgui_impl_allegro5.h" />
+    <ClInclude Include="Simulation\GUI\imgui\imgui_internal.h" />
+    <ClInclude Include="Simulation\GUI\imgui\imgui_stdlib.h" />
+    <ClInclude Include="Simulation\GUI\imgui\imstb_rectpack.h" />
+    <ClInclude Include="Simulation\GUI\imgui\imstb_textedit.h" />
+    <ClInclude Include="Simulation\GUI\imgui\imstb_truetype.h" />
     <ClInclude Include="Simulation\LCD\AllegroError.h" />
     <ClInclude Include="Simulation\LCD\basicLCD.h" />
     <ClInclude Include="Simulation\LCD\concreteLCD.h" />
